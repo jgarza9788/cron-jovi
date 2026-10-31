@@ -1,0 +1,44 @@
+# Maintainer: Justin Garza <jgarza9788@gmail.com>
+# Built by scripts/release/build.sh, from the tarball it makes. Not for the AUR.
+pkgname=cron-jovi
+pkgver=0.0.1
+pkgrel=1
+pkgdesc="Shortcuts-style automation for the Linux desktop"
+arch=('any')
+url="https://github.com/jgarza9788/cron-jovi"
+license=('MIT')
+depends=('python' 'python-yaml' 'python-requests' 'python-flask' 'python-werkzeug'
+         'python-pywebview' 'python-watchdog' 'python-gobject' 'webkit2gtk-4.1' 'systemd')
+makedepends=('python-setuptools')
+optdepends=('libnotify: notifications'
+            'wl-clipboard: clipboard and screenshots'
+            'wtype: typing into apps'
+            'playerctl: media control'
+            'grim: screenshots'
+            'slurp: screenshots of a selection'
+            'zenity: asking questions'
+            'brightnessctl: screen brightness'
+            'wireplumber: volume')
+source=("$pkgname-$pkgver.tar.gz")
+sha256sums=('SKIP')
+
+build() {
+  cd "$pkgname-$pkgver"
+  python -c "from setuptools import build_meta as b; b.build_wheel('dist')"
+}
+
+package() {
+  cd "$pkgname-$pkgver"
+  local site
+  site="$(python -c 'import site; print(site.getsitepackages()[0])')"
+  install -d "$pkgdir$site"
+  bsdtar -xf dist/*.whl -C "$pkgdir$site"
+  python -m compileall -q -s "$pkgdir" "$pkgdir$site/cron_jovi"
+  install -d "$pkgdir/usr/bin"
+  printf '#!/usr/bin/python\nimport sys\nfrom cron_jovi.cli import main\nsys.exit(main())\n' > "$pkgdir/usr/bin/cronjovi"
+  chmod 755 "$pkgdir/usr/bin/cronjovi"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 cron_jovi/gui/static/cronjovi.svg \
+    "$pkgdir/usr/share/icons/hicolor/scalable/apps/cronjovi.svg"
+  install -Dm644 packaging/arch/cronjovi.desktop "$pkgdir/usr/share/applications/cronjovi.desktop"
+}

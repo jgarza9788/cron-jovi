@@ -10,7 +10,6 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -43,10 +42,10 @@ def same(first: str, second: str) -> bool:
 
 
 def command(slug: str) -> list[str]:
-    installed = shutil.which("cronjovi")
+    installed = None if os.environ.get("APPIMAGE") else shutil.which("cronjovi")
     if installed:
         return [installed, "run", slug]
-    return [sys.executable, "-m", "cron_jovi", "run", slug]
+    return [*paths.self_command(), "run", slug]
 
 
 def _lua_string(text: str) -> str:

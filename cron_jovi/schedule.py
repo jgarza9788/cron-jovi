@@ -10,7 +10,6 @@ the past, the machine wasn't there for it.
 import calendar
 import re
 import subprocess
-import sys
 import time
 from typing import Callable
 
@@ -30,7 +29,7 @@ Description=Cron Jovi schedule tick for %i
 
 [Service]
 Type=oneshot
-ExecStart={python} -m cron_jovi tick %i
+ExecStart={command} tick %i
 """
 TIMER = """\
 [Unit]
@@ -102,7 +101,7 @@ def spawn_run(workflow: Workflow, scheduled_at: float, note: str) -> None:
             "systemd-run", "--user", "--collect", "--quiet",
             f"--unit=cronjovi-job-{workflow.slug}-{int(scheduled_at)}",
             f"--description=Cron Jovi: {workflow.name}",
-            sys.executable, "-m", "cron_jovi", "run", workflow.slug,
+            *paths.self_command(), "run", workflow.slug,
             "--trigger", "schedule", "--scheduled-for", str(scheduled_at), "--note", note,
         ],
         check=True,
@@ -158,7 +157,7 @@ def sync_timers(workflows: list[Workflow], history: History) -> list[str]:
     """Make the user's timers match the enabled scheduled workflows."""
     unit_dir = paths.systemd_user_dir()
     unit_dir.mkdir(parents=True, exist_ok=True)
-    (unit_dir / TICK_UNIT).write_text(TICK_SERVICE.format(python=sys.executable))
+    (unit_dir / TICK_UNIT).write_text(TICK_SERVICE.format(command=" ".join(paths.self_command())))
 
     wanted = {w.slug: w for w in workflows if w.enabled and w.trigger.schedule}
     for slug, workflow in wanted.items():

@@ -1,5 +1,4 @@
-import sys
-
+from .. import paths
 from ..action_api import ActionError, action
 
 
@@ -8,7 +7,7 @@ from ..action_api import ActionError, action
 def run_other(ctx, workflow: str) -> None:
     # A separate process, so its overlap lock also stops loops: A runs B runs A is skipped.
     ctx.summary = f"Run {workflow}"
-    code, _ = ctx.stream([sys.executable, "-u", "-m", "cron_jovi", "run", workflow,
-                          "--trigger", "workflow"])
+    code, _ = ctx.stream([*paths.self_command(), "run", workflow, "--trigger", "workflow"],
+                         env={"PYTHONUNBUFFERED": "1"})
     if code:
         raise ActionError(f"{workflow} failed", code)

@@ -14,7 +14,6 @@ import os
 import secrets
 import signal
 import subprocess
-import sys
 import threading
 import time
 from collections import defaultdict, deque
@@ -31,7 +30,7 @@ ENGINE_SERVICE = """\
 Description=Cron Jovi engine
 
 [Service]
-ExecStart={python} -m cron_jovi daemon
+ExecStart={command} daemon
 Restart=on-failure
 RestartSec=5
 
@@ -71,7 +70,7 @@ def sync_engine(workflows: list[Workflow]) -> list[str]:
             _systemctl("daemon-reload")
         stamp.unlink(missing_ok=True)
         return []
-    text = ENGINE_SERVICE.format(python=sys.executable)
+    text = ENGINE_SERVICE.format(command=" ".join(paths.self_command()))
     unit_changed = not unit.exists() or unit.read_text() != text
     if unit_changed:
         unit.parent.mkdir(parents=True, exist_ok=True)
@@ -112,7 +111,7 @@ def spawn_event(workflow: Workflow, trigger: str, variables: dict, note: str = "
         [
             "systemd-run", "--user", "--collect", "--quiet", f"--unit={unit}",
             f"--description=Cron Jovi: {workflow.name}",
-            sys.executable, "-m", "cron_jovi", "run", workflow.slug,
+            *paths.self_command(), "run", workflow.slug,
             "--trigger", trigger, "--vars-json", payload, "--note", note,
         ],
         check=True,

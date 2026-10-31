@@ -1,7 +1,14 @@
 """Where CronJovi keeps things on disk. Every path honours XDG overrides."""
 
 import os
+import sys
 from pathlib import Path
+
+
+def self_command() -> list[str]:
+    """How to start this copy. An AppImage's own path changes on every launch, so timers use the file."""
+    image = os.environ.get("APPIMAGE")
+    return [image] if image else [sys.executable, "-m", "cron_jovi"]
 
 
 def _xdg(var: str, default: str) -> Path:

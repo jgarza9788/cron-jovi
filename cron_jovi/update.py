@@ -71,8 +71,10 @@ def check(force: bool = False) -> dict | None:
 
 def blocked() -> str:
     """Why this copy can't update itself, or nothing if it can."""
+    if os.environ.get("APPIMAGE"):
+        return f"Download the new AppImage from github.com/{REPO}/releases."
     if sys.prefix == sys.base_prefix:
-        return "This copy isn't installed in its own environment, so it can't update itself."
+        return "This copy came from a package. Update it the same way you installed it."
     if "site-packages" not in Path(__file__).parts:
         return "This copy runs from source. Use git to update it."
     return ""

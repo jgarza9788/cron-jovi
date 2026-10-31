@@ -32,5 +32,5 @@ package() {
   install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
   install -Dm644 cron_jovi/gui/static/cronjovi.svg \
     "$pkgdir/usr/share/icons/hicolor/scalable/apps/cronjovi.svg"
-  install -Dm644 packaging/cronjovi.desktop "$pkgdir/usr/share/applications/cronjovi.desktop"
+  install -Dm644 packaging/arch/cronjovi.desktop "$pkgdir/usr/share/applications/cronjovi.desktop"
 }
