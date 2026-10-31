@@ -31,7 +31,7 @@ git show "$commit:packaging/arch/PKGBUILD" | sed "s/^pkgver=.*/pkgver=$version/"
 (cd "$work" && PKGDEST="$out" makepkg -f --noconfirm --nodeps >/dev/null)
 
 echo "==> AppImage"
-source="$work/src"
+source="$work/appimage-source"
 mkdir "$source"
 tar -xzf "$out/cron-jovi-$version.tar.gz" -C "$source" --strip-components=1
 "$source/packaging/appimage/build.sh" "$source" "$work/AppDir" "$out/CronJovi-$version-x86_64.AppImage" "$tools"

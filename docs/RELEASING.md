@@ -1,15 +1,13 @@
 # Making a release
 
-A release is a short list of steps, run by hand from `~/Work/cron-jovi`. Releases are made from `main` only. There is
-nothing to compile and no release files to upload: people install from the git tag with `install.sh`. `X.Y.Z` is the
-version in `cron_jovi/__init__.py`.
+A release is a few steps run from `~/Work/cron-jovi`, always from `main`. `scripts/release/` builds the files and
+publishes them. `X.Y.Z` is the version in `cron_jovi/__init__.py`.
 
 ```sh
-cd ~/Work/cron-jovi
 git switch main && git pull
-# ...work through the steps below...
-git push origin vX.Y.Z                                                    # public
-gh release create vX.Y.Z --title "Cron Jovi vX.Y.Z Name" --prerelease --notes-file /tmp/cronjovi-notes.md   # public
+scripts/release/build.sh              # everything except publishing
+# ...look at dist-release/vX.Y.Z/, write dist-release/notes.md...
+scripts/release/publish.sh            # public: shows everything, asks for a yes
 ```
 
 ## The steps
@@ -17,13 +15,14 @@ gh release create vX.Y.Z --title "Cron Jovi vX.Y.Z Name" --prerelease --notes-fi
 | Step | What to do | Command | Time |
 |---|---|---|---|
 | 1 | Set the version, codename and stage. | edit `cron_jovi/__init__.py` | seconds |
-| 2 | Run the Python tests. | `python3 -m unittest discover -s tests` | seconds |
-| 3 | Run the front-end tests. | `npm ci && npm test` | seconds |
-| 4 | Check the dependencies for known CVEs. | `pip-audit --local` (in a venv with Cron Jovi installed) | seconds |
-| 5 | Open a PR into `main`, wait for CI, and merge it. Direct pushes to `main` are blocked. | `gh pr create`, then `gh pr merge --admin --merge` | ~2 min |
-| 6 | Write the release notes (below). | `/tmp/cronjovi-notes.md` | minutes |
-| 7 | Tag that commit. | `git tag -a vX.Y.Z -m "vX.Y.Z Name"` | seconds |
-| 8 | Push the tag and create the GitHub release. Public. | the two commands above | seconds |
+| 2 | Run the tests. | `python3 -m unittest discover -s tests`, then `npm ci && npm test` | seconds |
+| 3 | Open a PR into `main`, wait for CI, and merge it. Direct pushes to `main` are blocked. | `gh pr create`, then `gh pr merge --admin --merge` | ~2 min |
+| 4 | Build the source tarball, the Arch package, the AppImage and `SHA256SUMS` into `dist-release/vX.Y.Z/`. Publishes nothing. | `scripts/release/build.sh` | ~1 min |
+| 5 | Test the files in clean containers (below). | `podman run ...` | minutes |
+| 6 | Write `dist-release/notes.md` (below). | | minutes |
+| 7 | Tag and create the GitHub release with its files. Public. Asks for a yes, and refuses if the release exists unless given `--replace`. | `scripts/release/publish.sh` | seconds |
+
+`build.sh` uses the committed code, and needs `appimagetool` from `~/Work/CaptainFM-tools` (set `TOOLS` to change that).
 
 ## Where things are set
 
@@ -53,12 +52,15 @@ dependency audit, and the niri checks against the real `niri` program.
   ## Limits
   ```
 
-  Install is the clone, `git checkout vX.Y.Z` and `./install.sh` lines. Keep the limits from the Reference below.
+  Install lists each file and the clone lines. Keep the limits from the Reference below.
+- **Containers:** install the Arch package in `archlinux:latest` and run a workflow, and do the same with the AppImage
+  (`--appimage-extract`, then `squashfs-root/AppRun`, since containers have no FUSE).
 - **Publish:** show the notes and the commit first, and get a yes. Never move or delete a tag that is already published
   without the owner saying so. A tag that hasn't been pushed can be moved with `git tag -f -a`.
 
-**Updates:** Cron Jovi updates itself from these tags. It installs the source of the newest `vX.Y.Z` release, so a release
-reaches people as soon as it is published, including pre-releases. Test before you tag, and never reuse a version.
+**Updates:** copies from `install.sh` update themselves from these tags. They install the source of the newest `vX.Y.Z`
+release, so a release reaches people as soon as it is published, including pre-releases. Arch and AppImage copies show a
+note instead, because they update the way they were installed. Test before you tag, and never reuse a version.
 
 **Who can do what:** only the owner can merge into `main`, or create, move or delete `v*` tags. Both are GitHub rulesets:
 "Protect main" and "Protect release tags". Keep the repo free of collaborators with write access, since write access
@@ -79,7 +81,12 @@ Omarchy. Without a compositor it still works, apart from hotkeys, `workspace` an
 - Beta. Expect rough edges.
 - On niri, hotkeys have been checked up to the key press itself, not with a physical keyboard.
 - The app window needs `webkit2gtk-4.1` and `python-gobject`. Without them it opens in the browser.
+- The AppImage always opens in the browser, because its Python can't load the desktop's WebKit.
+- The AppImage needs glibc 2.44 or newer, so it starts on rolling distros only (it does not start on Debian 13). It keeps
+  its timers and hotkeys only while the file stays in the same place.
 - Schedules stop at logout unless `loginctl enable-linger` is on.
+
+**Shipped:** the source tarball, the Arch package (`pacman -U`), the AppImage and `SHA256SUMS`.
 
 **Not shipped:** the AUR, which isn't taking new accounts, so `packaging/aur/` is not published. Also no `.deb`, `.rpm`,
 Flatpak or PyPI package.
