@@ -4,7 +4,7 @@
 
 - [x] 1. Add a license: MIT
 - [x] 2. Set up CI, covering Python 3.11 through 3.14
-- [ ] 3. Tag a release: v0.0.1 *Blaze of Glory*. Tagged locally; not pushed yet
+- [ ] 3. Tag a release: v0.0.1 *Blaze of Glory*. Tagged locally; push it once CI passes
 - [ ] 4. Add an AUR package. `packaging/aur/` is ready; not test-built or published yet
 
 ## Gaps against the design doc

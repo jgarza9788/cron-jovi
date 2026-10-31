@@ -20,7 +20,8 @@ from .workflow import Workflow, WorkflowError
 
 LATE_AFTER = 120  # seconds past the tick before a run counts as late
 BATCH = 500
-UTC_LINE = re.compile(r"\(in UTC\): \w+ (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d) UTC")
+# On a UTC system there is no separate "(in UTC)" line, so match any line ending in UTC.
+UTC_LINE = re.compile(r": \w+ (\d{4}-\d\d-\d\d \d\d:\d\d:\d\d) UTC$", re.M)
 
 TICK_UNIT = "cronjovi-tick@.service"
 TICK_SERVICE = """\

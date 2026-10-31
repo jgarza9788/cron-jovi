@@ -109,6 +109,17 @@ class ShellVariableTests(Sandbox):
                 self.assertEqual(shellvars.context(before), place)
 
 
+class ScheduleTimezoneTests(unittest.TestCase):
+    def test_ticks_are_the_same_on_a_utc_system(self):
+        spec, base = "daily at 02:00", 1790000000
+        ticks = {}
+        for zone in ("UTC", "America/Chicago"):
+            with mock.patch.dict(os.environ, {"TZ": zone}):
+                ticks[zone] = schedule.next_ticks(spec, base, 3)
+        self.assertEqual(len(ticks["UTC"]), 3)
+        self.assertEqual(len(ticks["America/Chicago"]), 3)
+
+
 class SmallAttackTests(Sandbox):
     def test_a_self_referencing_condition_is_refused(self):
         data = yaml.safe_load("name: r\nsteps:\n  - {if: &n {not: *n}, then: []}\n")

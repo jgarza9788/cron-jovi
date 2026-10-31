@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     container: archlinux:base
     steps:
-      - run: pacman -Syu --noconfirm git niri python python-yaml
+      - run: pacman -Syu --noconfirm git niri python python-yaml python-requests
       - uses: actions/checkout@v4
       - run: python -m unittest tests.test_niri -v
 
