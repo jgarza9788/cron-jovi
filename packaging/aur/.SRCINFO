@@ -1,0 +1,34 @@
+pkgbase = cron-jovi
+	pkgdesc = Shortcuts-style automation for the Linux desktop
+	pkgver = 0.0.1
+	pkgrel = 1
+	url = https://github.com/jgarza9788/cron-jovi
+	arch = any
+	license = MIT
+	makedepends = git
+	makedepends = python-build
+	makedepends = python-installer
+	makedepends = python-setuptools
+	depends = python
+	depends = python-yaml
+	depends = python-requests
+	depends = python-flask
+	depends = python-werkzeug
+	depends = python-pywebview
+	depends = python-watchdog
+	depends = python-gobject
+	depends = webkit2gtk-4.1
+	depends = systemd
+	optdepends = libnotify: notifications
+	optdepends = wl-clipboard: clipboard and screenshots
+	optdepends = wtype: typing into apps
+	optdepends = playerctl: media control
+	optdepends = grim: screenshots
+	optdepends = slurp: screenshots of a selection
+	optdepends = zenity: asking questions
+	optdepends = brightnessctl: screen brightness
+	optdepends = wireplumber: volume
+	source = git+https://github.com/jgarza9788/cron-jovi.git#tag=v0.0.1
+	sha256sums = SKIP
+
+pkgname = cron-jovi

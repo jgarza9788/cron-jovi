@@ -48,7 +48,7 @@ def sync(link_config: bool = False) -> SyncReport:
     problems = schedule.sync_timers(live, history)
     problems += daemon.sync_engine(live)
     messages = hotkeys.sync_hotkeys(live, link_config)
-    history.db.close()
+    history.close()
     return SyncReport(
         timers=sum(1 for w in live if w.enabled and w.trigger.schedule),
         hotkeys=sum(1 for w in live if w.enabled and w.trigger.hotkey),
@@ -151,6 +151,17 @@ def export(slug: str, folder: Path) -> Path:
     return target
 
 
+def parse_shared(text: str) -> dict:
+    """A workflow someone else wrote, which can't be assumed to be well formed."""
+    try:
+        data = yaml.safe_load(text)
+    except yaml.YAMLError as err:
+        raise WorkflowError(f"That file isn't valid YAML: {err}") from None
+    if not isinstance(data, dict):
+        raise WorkflowError("That file isn't a workflow")
+    return data
+
+
 def read_raw(slug: str) -> dict:
     path = path_for(slug)
     if not path.exists():
@@ -221,6 +232,8 @@ def effects(steps: list) -> list[str]:
         "type": lambda s: "Types into whichever app has focus",
         "run": lambda s: f"Runs your workflow {s.get('workflow')}",
         "clipboard": lambda s: "Replaces your clipboard" if s.get("op") == "set" else "Reads your clipboard",
+        "screenshot": lambda s: "Takes a screenshot",
+        "window": lambda s: f"{str(s.get('op', 'focus')).title()}s {s.get('app') or 'the focused window'}",
     }
     for step in steps or []:
         if step.get("action") in describe:

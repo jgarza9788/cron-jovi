@@ -20,9 +20,9 @@ import uuid
 from pathlib import Path
 
 import yaml
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, g, jsonify, request, send_from_directory
 
-from .. import daemon, doctor, gallery, hotkeys, paths, schedule, settings, store
+from .. import __codename__, __version__, daemon, doctor, gallery, hotkeys, paths, schedule, settings, store
 from ..action_api import describe, load_actions
 from ..engine import is_running, stop_run
 from ..history import History
@@ -124,6 +124,8 @@ def status() -> dict:
              for tool, found, actions in doctor.tool_report()]
     links = [{"name": a.name, "linked": a.linked()} for a in hotkeys.active()]
     return {
+        "version": __version__,
+        "codename": __codename__,
         "session": doctor.compositor(),
         "tools": tools,
         "timers_active": doctor.timers_active(),
@@ -154,7 +156,14 @@ def create_app(token: str, port_holder: dict | None = None) -> Flask:
     live: dict[str, LiveRun] = {}
 
     def history() -> History:
-        return History()
+        if "history" not in g:
+            g.history = History()
+        return g.history
+
+    @app.teardown_appcontext
+    def close_history(_error):
+        if "history" in g:
+            g.pop("history").close()
 
     @app.errorhandler(WorkflowError)
     def on_workflow_error(err):
@@ -168,7 +177,7 @@ def create_app(token: str, port_holder: dict | None = None) -> Flask:
             return jsonify(error="forbidden host"), 403
         if request.path.startswith("/api/"):
             supplied = request.headers.get("X-CronJovi-Token", "")
-            if not hmac.compare_digest(supplied, token):
+            if not hmac.compare_digest(supplied.encode(), token.encode()):
                 return jsonify(error="forbidden"), 403
         return None
 
@@ -178,7 +187,8 @@ def create_app(token: str, port_holder: dict | None = None) -> Flask:
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:"
+            "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; "
+            "object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
         )
         response.headers["Cache-Control"] = "no-store"
         return response
@@ -380,10 +390,7 @@ def create_app(token: str, port_holder: dict | None = None) -> Flask:
     @app.post("/api/import/review")
     def api_import_review():
         """Describe a shared workflow without saving or running anything."""
-        try:
-            data = yaml.safe_load(request.get_json().get("yaml", ""))
-        except yaml.YAMLError as err:
-            raise WorkflowError(f"That file isn't valid YAML: {err}") from None
+        data = store.parse_shared(request.get_json().get("yaml", ""))
         workflow = parse(data, paths.workflows_dir() / "import.yaml")
         return jsonify(
             name=workflow.name,
@@ -396,9 +403,8 @@ def create_app(token: str, port_holder: dict | None = None) -> Flask:
 
     @app.post("/api/import")
     def api_import():
-        data = yaml.safe_load(request.get_json().get("yaml", ""))
-        if isinstance(data, dict):
-            data["enabled"] = False  # imports never start firing on their own
+        data = store.parse_shared(request.get_json().get("yaml", ""))
+        data["enabled"] = False  # imports never start firing on their own
         workflow = store.create(data)
         return jsonify(slug=workflow.slug), 201
 

@@ -17,6 +17,8 @@ def file(
     source = Path(src).expanduser()
     target = Path(dest).expanduser()
     if op == "rename":
+        if "/" in dest or dest in ("", ".", ".."):
+            raise ActionError(f"“{dest}” isn't a file name. Use move to change folders.")
         target = source.with_name(dest)
     elif target.is_dir():
         target = target / source.name

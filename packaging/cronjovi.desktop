@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Cron Jovi
+Comment=Automate your desktop with simple workflows
+Exec=cronjovi gui
+Icon=cronjovi
+Terminal=false
+Categories=Utility;
+Keywords=automation;shortcuts;schedule;hotkey;

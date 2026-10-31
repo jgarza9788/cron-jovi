@@ -167,6 +167,7 @@ class ApiTests(Base):
 
     def test_page_has_a_content_security_policy(self):
         response = self.client.get("/", base_url="http://127.0.0.1:5000")
+        self.addCleanup(response.close)
         self.assertIn("default-src 'self'", response.headers["Content-Security-Policy"])
 
     def test_create_read_save_delete(self):
@@ -208,6 +209,7 @@ class ApiTests(Base):
     def test_clear_history_keeps_running_rows(self):
         from cron_jovi.history import History
         history = History()
+        self.addCleanup(history.close)
         history.finish(history.start("a", "manual"), "succeeded", 0, "", "private output")
         running = history.start("b", "manual")
         self.assertEqual(self.call("delete", "/history").status_code, 200)
@@ -231,6 +233,7 @@ class ApiTests(Base):
         slug = self.make()
         from cron_jovi.history import History
         history = History()
+        self.addCleanup(history.close)
         history.finish(history.start(slug, "manual"), "succeeded", 0, "", "x" * 1000)
         row = self.call("get", "/state").json["workflows"][0]["last_run"]
         self.assertNotIn("output", row)
@@ -264,7 +267,7 @@ class ApiTests(Base):
 
     def test_actions_describe_themselves(self):
         actions = self.call("get", "/actions").json
-        self.assertEqual(len(actions), 20)
+        self.assertEqual(len(actions), 21)
         for action in actions:
             self.assertTrue(action["title"] and action["blurb"] and action["icon"], action["name"])
 

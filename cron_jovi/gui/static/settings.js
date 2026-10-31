@@ -93,6 +93,33 @@ export function reviewDialog(text, review) {
   }, "primary"]], { wide: true });
 }
 
+const SOURCE_URL = "https://github.com/jgarza9788/cron-jovi";
+const SUPPORT_URL = "https://ko-fi.com/jgarza9788";
+
+function aboutRow(title, detail, url) {
+  const copy = async () => {
+    await copyText(url);
+    toast("Link copied", "success");
+  };
+  return h("div", { class: "row" },
+    h("div", { class: "meta" }, h("strong", {}, title), h("small", {}, detail)),
+    url ? button("Copy link", copy, { class: "small" }) : null);
+}
+
+export function aboutSection() {
+  const version = S.status?.version ? `v${S.status.version}` : "";
+  return [
+    h("h2", { class: "section" }, "About"),
+    h("div", { class: "rows about" },
+      h("div", { class: "row" }, h("div", { class: "meta" },
+        h("strong", {}, "Cron Jovi ", h("span", { class: "about-version" }, version)),
+        h("small", {}, h("em", {}, S.status?.codename || "")))),
+      aboutRow("License", "MIT. Free to use, share and change."),
+      aboutRow("Source code", SOURCE_URL.replace("https://", ""), SOURCE_URL),
+      aboutRow("Support Cron Jovi", SUPPORT_URL.replace("https://", ""), SUPPORT_URL)),
+  ];
+}
+
 export function renderSettings(top, body) {
   top.replaceChildren(h("div", { class: "top-title" }, h("strong", {}, "Settings"), h("span", {}, "Cron Jovi")));
   const saveAccent = async (accent) => {
@@ -144,6 +171,7 @@ export function renderSettings(top, body) {
     h("div", { class: "rows" }, h("div", { class: "row" },
       h("div", { class: "meta" }, h("strong", {}, "Import a workflow"),
         h("small", {}, "Add a .yaml file someone shared with you. You'll review it first.")),
-      button("Import…", importWorkflow, { class: "small", icon: "upload" }))));
+      button("Import…", importWorkflow, { class: "small", icon: "upload" }))),
+    aboutSection());
   body.replaceChildren(sidebar("settings"), page);
 }

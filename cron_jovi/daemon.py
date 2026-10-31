@@ -417,7 +417,7 @@ def webhook_app(rules: list[Workflow], fire: Callable):
     def hook(slug, token):
         expected = webhook_tokens().get(slug, "")
         workflow = by_slug.get(slug)
-        if not workflow or not expected or not hmac.compare_digest(token, expected):
+        if not workflow or not expected or not hmac.compare_digest(token.encode(), expected.encode()):
             return jsonify(error="not found"), 404
         body = request.get_json(silent=True)
         text = request.get_data(as_text=True) if body is None else ""

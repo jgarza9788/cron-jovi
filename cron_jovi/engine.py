@@ -12,7 +12,7 @@ from collections import deque
 from datetime import datetime
 from typing import Any, Callable
 
-from . import paths
+from . import paths, shellvars
 from .action_api import ActionError, coerce, load_actions
 from .conditions import CONDITIONS
 from .explain import explain
@@ -108,11 +108,25 @@ class Context:
             return self.lookup(whole[1])
 
         def fill(match: re.Match) -> str:
-            found = self.lookup(match[1])
-            text = ", ".join(map(str, found)) if isinstance(found, list) else str(found)
+            text = self.text(match[1])
             return quote(text) if quote else text
 
         return VARIABLE.sub(fill, value)
+
+    def text(self, dotted: str) -> str:
+        found = self.lookup(dotted)
+        return ", ".join(map(str, found)) if isinstance(found, list) else str(found)
+
+    def render_shell(self, command: str) -> tuple[str, dict[str, str]]:
+        """A command that refers to its variables, plus the environment holding them."""
+        env: dict[str, str] = {}
+
+        def fill(match: re.Match) -> str:
+            name = f"{shellvars.PREFIX}{len(env) + 1}"
+            env[name] = self.text(match[1]).replace("\0", "")
+            return shellvars.reference(name, command[:match.start()])
+
+        return VARIABLE.sub(fill, command), env
 
     def run(self, argv: list[str], input: str | None = None, capture: bool = True) -> str:
         """Run a helper tool and return its stdout. Failure raises ActionError."""
@@ -126,7 +140,8 @@ class Context:
             raise ActionError(detail or f"{argv[0]} exited {proc.returncode}", proc.returncode)
         return (proc.stdout or "").rstrip("\n")
 
-    def stream(self, argv: list[str], timeout: float | None = None) -> tuple[int, str]:
+    def stream(self, argv: list[str], timeout: float | None = None,
+               env: dict[str, str] | None = None) -> tuple[int, str]:
         """Run a long command, logging output live. Returns (exit code, output)."""
         try:
             proc = subprocess.Popen(
@@ -137,17 +152,18 @@ class Context:
                 errors="replace",
                 start_new_session=True,
                 # English messages, so error_table.yaml matches on any system.
-                env={**os.environ, "LC_MESSAGES": "C", "LANGUAGE": "C"},
+                env={**os.environ, "LC_MESSAGES": "C", "LANGUAGE": "C", **(env or {})},
             )
         except FileNotFoundError:
             raise ActionError(f"{argv[0]} not found", 127) from None
         captured: deque[str] = deque(maxlen=MAX_OUTPUT_LINES)
 
         def read() -> None:
-            for line in proc.stdout:
-                line = line.rstrip("\n")
-                captured.append(line)
-                self.log(line)
+            with proc.stdout:  # here, since a backgrounded child can outlive the run
+                for line in proc.stdout:
+                    line = line.rstrip("\n")
+                    captured.append(line)
+                    self.log(line)
 
         reader = threading.Thread(target=read, daemon=True)
         reader.start()
@@ -208,8 +224,20 @@ def run_action(step: dict, ctx: Context) -> bool:
     return True
 
 
+def render_condition(spec: dict, ctx: Context) -> dict:
+    rendered = {}
+    for name, value in spec.items():
+        if name == "command":
+            rendered[name] = ctx.render_shell(str(value))
+        elif name == "not":
+            rendered[name] = render_condition(value, ctx)
+        else:
+            rendered[name] = ctx.render(value)
+    return rendered
+
+
 def evaluate(spec: dict, ctx: Context) -> bool:
-    return all(CONDITIONS[name](ctx.render(value)) for name, value in spec.items())
+    return all(CONDITIONS[name](value) for name, value in render_condition(spec, ctx).items())
 
 
 def repeat_items(step: dict, ctx: Context) -> list | range:
@@ -425,7 +453,7 @@ def tell_user(workflow: Workflow, reason: str) -> None:
     """Nobody is watching a background run, so its failure can't stay in a log."""
     try:
         subprocess.run(
-            ["notify-send", "--app-name=Cron Jovi", "-u", "critical",
+            ["notify-send", "--app-name=Cron Jovi", "-u", "critical", "--",
              f"{workflow.name} failed", reason],
             capture_output=True, timeout=5,
         )

@@ -181,14 +181,16 @@ def _trigger(data: Any) -> Trigger:
     return trigger
 
 
-def _check_conditions(spec: dict, at: str) -> None:
+def _check_conditions(spec: dict, at: str, depth: int = 0) -> None:
+    if depth > MAX_DEPTH:
+        raise WorkflowError(f"{at}: too many nested conditions")
     unknown = set(spec) - set(CONDITIONS)
     if unknown:
         raise WorkflowError(f"{at}: unknown condition: {', '.join(sorted(unknown))}")
     if "not" in spec:
         if not isinstance(spec["not"], dict) or not spec["not"]:
             raise WorkflowError(f"{at}: not needs at least one condition")
-        _check_conditions(spec["not"], at)
+        _check_conditions(spec["not"], at, depth + 1)
     for name in ("equals", "contains"):
         if name in spec and (not isinstance(spec[name], list) or len(spec[name]) != 2):
             raise WorkflowError(f"{at}: {name} needs two values")

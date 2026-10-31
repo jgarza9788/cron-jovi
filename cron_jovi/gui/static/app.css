@@ -363,3 +363,4 @@ button:disabled { cursor: default; opacity: .5; }
 .drag-pill { position: fixed; top: -200px; left: 0; display: inline-flex; align-items: center; gap: 8px; max-width: 220px; height: 34px; padding: 0 12px 0 5px; border-radius: 17px; border: 1px solid var(--accent); background: var(--bg-raised); color: var(--text); font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .drag-pill .chip { width: 24px; height: 24px; border-radius: 12px; }
 .drop-before::before, .drop-after::after { animation: fade .1s ease; }
+.about-version { color: var(--text-dim); font-weight: 400; margin-left: 4px; }

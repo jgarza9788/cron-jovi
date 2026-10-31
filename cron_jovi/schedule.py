@@ -67,7 +67,7 @@ def next_ticks(spec: str, base: float, count: int = 1) -> list[float]:
     proc = subprocess.run(
         [
             "systemd-analyze", "calendar", f"--iterations={count}",
-            f"--base-time=@{int(base)}", to_calendar(spec),
+            f"--base-time=@{int(base)}", "--", to_calendar(spec),
         ],
         capture_output=True,
         text=True,

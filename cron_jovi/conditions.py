@@ -1,5 +1,6 @@
 """Conditions usable under `if:`. Several conditions in one `if:` must all hold."""
 
+import os
 import subprocess
 from datetime import datetime, time
 from pathlib import Path
@@ -30,8 +31,10 @@ def file_exists(spec: str) -> bool:
     return Path(str(spec)).expanduser().exists()
 
 
-def command(spec: str) -> bool:
-    return subprocess.run(["bash", "-c", str(spec)], capture_output=True).returncode == 0
+def command(spec: str | tuple) -> bool:
+    text, values = spec if isinstance(spec, tuple) else (str(spec), {})
+    return subprocess.run(["bash", "-c", text], capture_output=True,
+                          env={**os.environ, **values}).returncode == 0
 
 
 def equals(spec: list) -> bool:
@@ -51,7 +54,7 @@ def on_battery(spec: bool, root: Path = POWER_ROOT) -> bool:
 
 
 def app_running(spec: str) -> bool:
-    return subprocess.run(["pgrep", "-xi", str(spec)], capture_output=True).returncode == 0
+    return subprocess.run(["pgrep", "-xi", "--", str(spec)], capture_output=True).returncode == 0
 
 
 def negate(spec: dict) -> bool:

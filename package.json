@@ -1,0 +1,7 @@
+{
+  "name": "cron-jovi-frontend-tests",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test --test-force-exit tests/frontend/*.test.js" },
+  "devDependencies": { "jsdom": "^26.0.0" }
+}

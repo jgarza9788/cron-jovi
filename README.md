@@ -58,7 +58,7 @@ Press the **⋯** on any step to move, copy or turn it off, or open a step and u
 
 ## Actions
 
-There are 20 built in. Some use a small Linux tool, and the bar at the bottom of the
+There are 21 built in. Some use a small Linux tool, and the bar at the bottom of the
 app tells you if one's missing and how to install it.
 
 | Action | What it does | Uses |
@@ -76,6 +76,7 @@ app tells you if one's missing and how to install it.
 | `dnd` | Do Not Disturb on or off | Omarchy, mako, swaync or dunst |
 | `screenshot` | Grab the screen or a selection | grim, slurp, wl-clipboard |
 | `workspace` | Jump to a workspace | hyprctl or niri |
+| `window` | Focus, close or move a window | hyprctl or niri |
 | `lock` | Lock the screen | Omarchy or loginctl |
 | `ask` | Ask a question or offer choices | zenity |
 | `text` | Trim, change case, replace or split | |
@@ -131,8 +132,10 @@ the YAML tab keeps them. If a file changes outside the app, the app won't overwr
 `{{ date }}`, `{{ time }}`, `{{ weekday }}` and `{{ workflow }}` are always there. A
 list gives `{{ parts.count }}` and `{{ parts.1 }}`, counting from 1.
 
-In `shell` commands, values are shell-quoted for you. Write `echo {{ clip }}`, not
-`echo "{{ clip }}"`.
+In `shell` commands and `command` conditions, a value can never run as code, so text
+from a file name or the clipboard is safe to use. Quotes around it are fine either way.
+This is for bash, sh, dash, zsh and ksh. With any other `shell:`, values arrive already
+quoted, so don't add your own.
 
 The `math` action works out sums with variables: `sum: "{{ num }} * 2 + 1"`.
 
@@ -289,9 +292,14 @@ Nothing leaves your computer unless a workflow you wrote sends it. The app talks
 local server that only listens on 127.0.0.1 and needs a token created for each launch.
 Run logs can hold what your commands printed, and Settings can clear them.
 
+## Using an AI agent
+
+[AGENTS.md](AGENTS.md) tells AI agents how to write workflows that are safe and valid.
+
 ## Development
 
     python3 -m unittest discover -s tests
+    npm ci && npm test
 
 The app's API tests are skipped unless Flask is installed. The design is in
 [docs/CronJovi-Design-Document.docx](docs/CronJovi-Design-Document.docx).
@@ -301,3 +309,7 @@ The app's API tests are skipped unless Flask is installed. The design is in
 Cron Jovi is free. If it saves you some time, you can help keep it going:
 
 **[☕ Buy me a coffee on Ko-fi](https://ko-fi.com/jgarza9788)**
+
+## License
+
+[MIT](LICENSE)

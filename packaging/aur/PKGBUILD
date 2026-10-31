@@ -1,0 +1,36 @@
+# Maintainer: Justin Garza <jgarza9788@gmail.com>
+pkgname=cron-jovi
+pkgver=0.0.1
+pkgrel=1
+pkgdesc="Shortcuts-style automation for the Linux desktop"
+arch=('any')
+url="https://github.com/jgarza9788/cron-jovi"
+license=('MIT')
+depends=('python' 'python-yaml' 'python-requests' 'python-flask' 'python-werkzeug'
+         'python-pywebview' 'python-watchdog' 'python-gobject' 'webkit2gtk-4.1' 'systemd')
+makedepends=('git' 'python-build' 'python-installer' 'python-setuptools')
+optdepends=('libnotify: notifications'
+            'wl-clipboard: clipboard and screenshots'
+            'wtype: typing into apps'
+            'playerctl: media control'
+            'grim: screenshots'
+            'slurp: screenshots of a selection'
+            'zenity: asking questions'
+            'brightnessctl: screen brightness'
+            'wireplumber: volume')
+source=("git+$url.git#tag=v$pkgver")
+sha256sums=('SKIP')
+
+build() {
+  cd "$pkgname"
+  python -m build --wheel --no-isolation
+}
+
+package() {
+  cd "$pkgname"
+  python -m installer --destdir="$pkgdir" dist/*.whl
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 cron_jovi/gui/static/cronjovi.svg \
+    "$pkgdir/usr/share/icons/hicolor/scalable/apps/cronjovi.svg"
+  install -Dm644 packaging/cronjovi.desktop "$pkgdir/usr/share/applications/cronjovi.desktop"
+}

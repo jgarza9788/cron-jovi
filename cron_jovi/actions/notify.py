@@ -12,4 +12,4 @@ def notify(
     urgency: Literal["low", "normal", "critical"] = "normal",
 ) -> None:
     ctx.summary = f'notify-send "{text}"'
-    ctx.run(["notify-send", "--app-name=Cron Jovi", "-u", urgency, title, text])
+    ctx.run(["notify-send", "--app-name=Cron Jovi", "-u", urgency, "--", title, text])

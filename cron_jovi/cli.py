@@ -7,9 +7,8 @@ import sys
 import time
 from datetime import datetime
 
-import yaml
 
-from . import __version__, daemon, doctor, gallery, hotkeys, paths, schedule, settings, store
+from . import __codename__, __version__, daemon, doctor, gallery, hotkeys, paths, schedule, settings, store
 from . import explain as explain_module
 from .action_api import load_actions
 from .engine import run_single_step, run_workflow
@@ -272,7 +271,7 @@ def cmd_gallery(args) -> int:
         gallery_id, _, name = (args.target or "").partition(":")
         text = gallery.read_item(gallery_id, name)
         print(text)
-        data = yaml.safe_load(text)
+        data = store.parse_shared(text)
         commands = store.shell_commands((data.get("steps") or []) + (data.get("on_failure") or []))
         if commands and not args.yes:
             print("This runs commands on your computer. Read it, then add --yes.", file=sys.stderr)
@@ -318,7 +317,7 @@ def cmd_teardown(args) -> int:
 
 def parser() -> argparse.ArgumentParser:
     main_parser = argparse.ArgumentParser(prog="cronjovi", description=__doc__)
-    main_parser.add_argument("--version", action="version", version=f"cronjovi {__version__}")
+    main_parser.add_argument("--version", action="version", version=f"cronjovi {__version__} ({__codename__})")
     sub = main_parser.add_subparsers(dest="command", required=True, metavar="COMMAND")
 
     run = sub.add_parser("run", help="run a workflow now")

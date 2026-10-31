@@ -33,10 +33,15 @@ class History:
     def __init__(self, path=None):
         path = path or paths.history_db()
         path.parent.mkdir(parents=True, exist_ok=True)
+        path.parent.chmod(0o700)  # run output can hold anything a command printed
         self.db = sqlite3.connect(path, timeout=30)
         self.db.row_factory = sqlite3.Row
         self.db.execute("PRAGMA journal_mode=WAL")
         self.db.executescript(SCHEMA)
+        path.chmod(0o600)
+
+    def close(self) -> None:
+        self.db.close()
 
     def start(self, workflow, trigger, scheduled_at=None, note="") -> int:
         with self.db:

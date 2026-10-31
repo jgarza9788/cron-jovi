@@ -166,7 +166,6 @@ def items(gallery_id: str) -> list[dict]:
 
 def install(gallery_id: str, name: str) -> str:
     """Add a workflow, switched off. Callers must show it for review first."""
-    data = yaml.safe_load(read_item(gallery_id, name))
-    if isinstance(data, dict):
-        data["enabled"] = False
+    data = store.parse_shared(read_item(gallery_id, name))
+    data["enabled"] = False
     return store.create(data).slug

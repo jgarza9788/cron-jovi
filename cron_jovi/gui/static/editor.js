@@ -87,6 +87,9 @@ async function flush() {
   if (E.again) { E.again = false; await flush(); }
 }
 
+/** Painting needs these lists, so they must exist before a snapshot or undo sees a change. */
+const withLists = (data) => ({ ...data, steps: data.steps || [], on_failure: data.on_failure || [] });
+
 function snapshot() {
   const now = JSON.stringify(E.data);
   if (now === E.snapshot) return;
@@ -97,12 +100,12 @@ function snapshot() {
   paintUndo();
 }
 
-function restore(from, to) {
-  snapshot();
-  if (!from.length) return;
-  to.push(E.snapshot);
-  E.snapshot = from.pop();
-  E.data = JSON.parse(E.snapshot);
+function restore(source, target) {
+  snapshot(); // this can replace the lists, so look them up afterwards
+  if (!E[source].length) return;
+  E[target].push(E.snapshot);
+  E.data = withLists(JSON.parse(E[source].pop()));
+  E.snapshot = JSON.stringify(E.data);
   paintHeader();
   paintTab();
   paintUndo();
@@ -110,8 +113,8 @@ function restore(from, to) {
   E.timer = setTimeout(flush, 100);
 }
 
-const undo = () => restore(E.undo, E.redo);
-const redo = () => restore(E.redo, E.undo);
+const undo = () => restore("undo", "redo");
+const redo = () => restore("redo", "undo");
 
 function paintUndo() {
   if (!parts.undoSlot) return;
@@ -135,8 +138,9 @@ document.addEventListener("keydown", (event) => {
 
 async function reloadFromFile() {
   const fresh = await get(`/workflows/${E.slug}`);
-  Object.assign(E, { data: fresh.data, yaml: fresh.yaml, stamp: fresh.stamp, conflict: false, error: "",
-    snapshot: JSON.stringify(fresh.data) });
+  const data = withLists(fresh.data);
+  Object.assign(E, { data, yaml: fresh.yaml, stamp: fresh.stamp, conflict: false, error: "",
+    snapshot: JSON.stringify(data) });
   setSaveState();
   paintHeader();
   paintTab();
@@ -458,7 +462,7 @@ function yamlPanel() {
     try {
       await put(`/workflows/${E.slug}/yaml`, { yaml: area.value }, E.stamp);
       const fresh = await get(`/workflows/${E.slug}`);
-      E.data = fresh.data; E.yaml = fresh.yaml; E.error = ""; E.stamp = fresh.stamp;
+      E.data = withLists(fresh.data); E.yaml = fresh.yaml; E.error = ""; E.stamp = fresh.stamp;
       await refresh();
       toast("Saved", "success");
       paintHeader();
@@ -517,8 +521,9 @@ export async function renderEditor(top, body) {
     E.run = null;
     Object.assign(E, { undo: [], redo: [], marks: {} });
   }
-  Object.assign(E, { slug, data: fresh.data, yaml: fresh.yaml, stamp: fresh.stamp, error: "", conflict: false,
-    snapshot: JSON.stringify(fresh.data) });
+  const data = withLists(fresh.data);
+  Object.assign(E, { slug, data, yaml: fresh.yaml, stamp: fresh.stamp, error: "", conflict: false,
+    snapshot: JSON.stringify(data) });
 
   parts = {};
   parts.topName = h("strong", {}, E.data.name);

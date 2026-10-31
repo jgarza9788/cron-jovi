@@ -1,17 +1,24 @@
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "cron-jovi"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Shortcuts-style automation for the Linux desktop"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["PyYAML>=6", "requests>=2.31", "Flask>=3", "pywebview>=5", "watchdog>=4"]
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+    "PyYAML>=6", "requests>=2.33", "Flask>=3.1.3", "Werkzeug>=3.1.9", "pywebview>=5", "watchdog>=4",
+]
 
 [project.scripts]
 cronjovi = "cron_jovi.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "cron_jovi.__version__" }
 
 [tool.setuptools.packages.find]
 include = ["cron_jovi*"]

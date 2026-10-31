@@ -78,6 +78,7 @@ function sentence(step) {
     case "file": return [choiceLabel(step.op), v(step.src, "a file"), "to", v(step.dest, "somewhere")];
     case "set": return ["Remember", v(step.name, "name"), "as", v(step.value)];
     case "workspace": return ["Switch to workspace", v(step.number)];
+    case "window": return [choiceLabel(step.op || "focus"), v(step.app, step.op === "focus" ? "an app" : "the focused window"), ...(step.op === "move" ? ["to workspace", v(step.workspace)] : [])];
     case "volume": return step.do && step.do !== "set" ? [choiceLabel(step.do), "the sound"] : ["Set volume to", v(`${step.percent ?? 50}%`)];
     case "screenshot": return ["Screenshot of", v(step.area === "selection" ? "a selection" : "the screen")];
     case "lock": return ["Lock the screen"];
