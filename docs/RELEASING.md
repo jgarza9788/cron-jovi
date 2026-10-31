@@ -20,7 +20,7 @@ gh release create vX.Y.Z --title "Cron Jovi vX.Y.Z Name" --prerelease --notes-fi
 | 2 | Run the Python tests. | `python3 -m unittest discover -s tests` | seconds |
 | 3 | Run the front-end tests. | `npm ci && npm test` | seconds |
 | 4 | Check the dependencies for known CVEs. | `pip-audit --local` (in a venv with Cron Jovi installed) | seconds |
-| 5 | Commit, push `main`, and wait for CI to pass on that commit. | `gh run watch --exit-status` | ~2 min |
+| 5 | Open a PR into `main`, wait for CI, and merge it. Direct pushes to `main` are blocked. | `gh pr create`, then `gh pr merge --admin --merge` | ~2 min |
 | 6 | Write the release notes (below). | `/tmp/cronjovi-notes.md` | minutes |
 | 7 | Tag that commit. | `git tag -a vX.Y.Z -m "vX.Y.Z Name"` | seconds |
 | 8 | Push the tag and create the GitHub release. Public. | the two commands above | seconds |
@@ -56,6 +56,13 @@ dependency audit, and the niri checks against the real `niri` program.
   Install is the clone, `git checkout vX.Y.Z` and `./install.sh` lines. Keep the limits from the Reference below.
 - **Publish:** show the notes and the commit first, and get a yes. Never move or delete a tag that is already published
   without the owner saying so. A tag that hasn't been pushed can be moved with `git tag -f -a`.
+
+**Updates:** Cron Jovi updates itself from these tags. It installs the source of the newest `vX.Y.Z` release, so a release
+reaches people as soon as it is published, including pre-releases. Test before you tag, and never reuse a version.
+
+**Who can do what:** only the owner can merge into `main`, or create, move or delete `v*` tags. Both are GitHub rulesets:
+"Protect main" and "Protect release tags". Keep the repo free of collaborators with write access, since write access
+is what allows creating a release.
 
 ## After
 Move what shipped into `docs/done.md`, and check the new release shows on the GitHub page with the right tag. While the

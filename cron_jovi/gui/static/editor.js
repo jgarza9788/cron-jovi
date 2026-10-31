@@ -1,5 +1,5 @@
 import { del, get, post, put } from "./api.js";
-import { ago, button, chip, COLOR_CHOICES, confirmDialog, duration, h, hotkeyLabel, ICON_CHOICES, icon, iconButton, menu, modal, segmented, toast, toggle } from "./ui.js";
+import { ago, BOLD_COLORS, button, chip, COLOR_CHOICES, confirmDialog, duration, h, hotkeyLabel, ICON_CHOICES, icon, iconButton, menu, modal, segmented, toast, toggle } from "./ui.js";
 import { S, eventText, refresh, scheduleText, triggerKind, triggerText, needsHotkeyLink } from "./state.js";
 import { actionPanel, newStep, stepList, unfinishedSteps } from "./steps.js";
 import { triggerSection } from "./trigger.js";
@@ -354,13 +354,17 @@ async function watchProgress() {
 }
 
 function iconPicker(event) {
+  const colorPick = (color) => h("button", { type: "button",
+    class: `pick swatch c-${color} ${E.data.color === color ? "on" : ""}`, "aria-label": color.replace("-", " "),
+    onclick: () => { E.data.color = color; update(); } });
   const body = [
-    h("div", { class: "picker" }, ICON_CHOICES.map((name) => h("button", { type: "button",
+    h("div", { class: "picker icons" }, ICON_CHOICES.map((name) => h("button", { type: "button",
       class: `pick ${E.data.icon === name ? "on" : ""}`, "aria-label": name,
       onclick: () => { E.data.icon = name; update(); } }, icon(name)))),
-    h("div", { class: "picker" }, COLOR_CHOICES.map((color) => h("button", { type: "button",
-      class: `pick swatch c-${color} ${E.data.color === color ? "on" : ""}`, "aria-label": color,
-      onclick: () => { E.data.color = color; update(); } }))),
+    h("div", { class: "side-label flush" }, "Theme colors"),
+    h("div", { class: "picker" }, COLOR_CHOICES.map(colorPick)),
+    h("div", { class: "side-label flush" }, "Bold colors"),
+    h("div", { class: "picker" }, Object.keys(BOLD_COLORS).map(colorPick)),
   ];
   const update = () => { changed(); close(); paintHeader(); };
   const close = modal("Icon and color", body);

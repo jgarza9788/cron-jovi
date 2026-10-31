@@ -20,6 +20,7 @@ const THEME = { source: "default", stamp: "0", colors: {
   muted: "#6b7280", accent: "#f5a623", selection: "#2a2f3a", red: "#f87171", yellow: "#f5c451", orange: "#fdba74",
   green: "#a7e0a0", cyan: "#7fd8cc", blue: "#9cc3ff", magenta: "#f5a9c8", purple: "#c8b4fb", gray: "#c4cbd8" } };
 
+let updateAnswer = { current: "0.0.1", available: null, blocked: "", status: { state: "idle" } };
 let saved;
 let stamp = "s0";
 let workflow;
@@ -44,7 +45,8 @@ async function fakeFetch(url, options = {}) {
   else if (path === "/actions") body = ACTIONS;
   else if (path === "/templates") body = [];
   else if (path === "/welcome") body = { seen: true };
-  else if (path === "/settings") body = { paused: false, accent: "" };
+  else if (path === "/settings") body = { paused: false, accent: "", update_check: false };
+  else if (path.startsWith("/update")) body = updateAnswer;
   else if (path === "/workflows/demo") body = { data: workflow, yaml: "", stamp, summary: summary() };
   else if (path.endsWith("/progress")) body = { running: false, steps: {} };
   else if (path.startsWith("/history")) body = [];
@@ -203,4 +205,39 @@ test("Settings ends with the version and release name", async () => {
   assert.match(about, /Cron Jovi v0\.0\.1 Beta/);
   assert.match(about, /Blaze of Glory/);
   assert.match(about, /MIT/);
+});
+
+test("Settings offers an update it finds, and only checks when asked", async () => {
+  await go({ name: "settings" });
+  await tick(20);
+  assert.match(document.body.textContent, /only when you press the button/);
+  updateAnswer = { ...updateAnswer, available: { tag: "v0.0.2", name: "v0.0.2 Next", url: "x" } };
+  [...document.querySelectorAll("button")].find((el) => el.textContent === "Check now").click();
+  await tick(20);
+  assert.match(document.body.textContent, /v0\.0\.2 Next is available/);
+  assert.ok([...document.querySelectorAll("button")].some((el) => el.textContent === "Update"));
+  updateAnswer = { ...updateAnswer, available: null };
+});
+
+test("every icon choice is drawn, and none repeats", async () => {
+  const { ICON_CHOICES, icon } = await import(new URL("ui.js", STATIC));
+  assert.ok(ICON_CHOICES.length >= 50);
+  assert.equal(new Set(ICON_CHOICES).size, ICON_CHOICES.length);
+  const fallback = icon("no-such-icon").innerHTML;
+  for (const name of ICON_CHOICES.filter((item) => item !== "zap")) {
+    assert.notEqual(icon(name).innerHTML, fallback, name);
+  }
+});
+
+test("every color has a style, and bold colors keep readable text and their value", async () => {
+  const { BOLD_COLORS, COLOR_CHOICES } = await import(new URL("ui.js", STATIC));
+  const css = readFileSync(new URL("app.css", STATIC), "utf8");
+  for (const color of [...COLOR_CHOICES, ...Object.keys(BOLD_COLORS)]) {
+    assert.match(css, new RegExp(`\\.c-${color} \\{`), color);
+  }
+  const root = document.documentElement.style;
+  for (const [color, value] of Object.entries(BOLD_COLORS)) {
+    assert.equal(root.getPropertyValue(`--c-${color}`), value);
+    assert.match(root.getPropertyValue(`--c-${color}-ink`), /^#(ffffff|14161b)$/);
+  }
 });

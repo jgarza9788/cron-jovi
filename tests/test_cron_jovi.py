@@ -511,7 +511,7 @@ class SkipStepTests(Base):
 
 class SettingsAndPauseTests(Base):
     def test_defaults_and_bad_values(self):
-        self.assertEqual(settings.load(), {"paused": False, "accent": ""})
+        self.assertEqual(settings.load(), {"paused": False, "accent": "", "update_check": False})
         self.assertEqual(settings.update(accent="red; evil")["accent"], "")
         self.assertEqual(settings.update(accent="#ff8800")["accent"], "#ff8800")
         self.assertNotIn("nonsense", settings.update(nonsense=1))

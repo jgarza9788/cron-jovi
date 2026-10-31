@@ -106,6 +106,16 @@ button:disabled { cursor: default; opacity: .5; }
 .c-green { --swatch: var(--c-green); --swatch-ink: var(--c-green-ink); }
 .c-orange { --swatch: var(--c-orange); --swatch-ink: var(--c-orange-ink); }
 .c-gray { --swatch: var(--c-gray); --swatch-ink: var(--c-gray-ink); }
+.c-bold-red { --swatch: var(--c-bold-red); --swatch-ink: var(--c-bold-red-ink); }
+.c-bold-orange { --swatch: var(--c-bold-orange); --swatch-ink: var(--c-bold-orange-ink); }
+.c-bold-yellow { --swatch: var(--c-bold-yellow); --swatch-ink: var(--c-bold-yellow-ink); }
+.c-bold-lime { --swatch: var(--c-bold-lime); --swatch-ink: var(--c-bold-lime-ink); }
+.c-bold-green { --swatch: var(--c-bold-green); --swatch-ink: var(--c-bold-green-ink); }
+.c-bold-teal { --swatch: var(--c-bold-teal); --swatch-ink: var(--c-bold-teal-ink); }
+.c-bold-blue { --swatch: var(--c-bold-blue); --swatch-ink: var(--c-bold-blue-ink); }
+.c-bold-indigo { --swatch: var(--c-bold-indigo); --swatch-ink: var(--c-bold-indigo-ink); }
+.c-bold-purple { --swatch: var(--c-bold-purple); --swatch-ink: var(--c-bold-purple-ink); }
+.c-bold-pink { --swatch: var(--c-bold-pink); --swatch-ink: var(--c-bold-pink-ink); }
 .chip { display: inline-grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 8px; background: var(--swatch); color: var(--swatch-ink); }
 
 .rows { display: flex; flex-direction: column; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
@@ -290,6 +300,7 @@ button:disabled { cursor: default; opacity: .5; }
 .key-note { display: flex; flex-direction: column; gap: 6px; }
 .key-note .banner { margin: 0; }
 .picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.picker.icons { max-height: 288px; overflow-y: auto; }
 .pick { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; border: 2px solid transparent; background: var(--bg-raised); }
 .pick.swatch { background: var(--swatch); }
 .pick.on { border-color: var(--text); }
@@ -363,4 +374,5 @@ button:disabled { cursor: default; opacity: .5; }
 .drag-pill { position: fixed; top: -200px; left: 0; display: inline-flex; align-items: center; gap: 8px; max-width: 220px; height: 34px; padding: 0 12px 0 5px; border-radius: 17px; border: 1px solid var(--accent); background: var(--bg-raised); color: var(--text); font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .drag-pill .chip { width: 24px; height: 24px; border-radius: 12px; }
 .drop-before::before, .drop-after::after { animation: fade .1s ease; }
+.about-gap { height: 12px; }
 .about-version { color: var(--text-dim); font-weight: 400; margin-left: 4px; }

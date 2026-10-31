@@ -1,4 +1,5 @@
 import { get } from "./api.js";
+import { BOLD_COLORS } from "./ui.js";
 
 let stamp = null;
 
@@ -61,8 +62,10 @@ export function applyTheme(theme) {
   set("green", legible(c.green));
   set("warn", legible(c.yellow));
   const purple = theme.source === "omarchy" ? mix(c.blue, c.magenta) : c.purple;
+  // The bold set stays the same in every theme, so those colors always look bold.
   const swatches = { yellow: c.yellow, blue: c.blue, pink: c.magenta, teal: c.cyan, purple,
-    green: c.green, orange: c.orange, gray: theme.source === "omarchy" ? mix(c.foreground, c.muted) : c.gray };
+    green: c.green, orange: c.orange, gray: theme.source === "omarchy" ? mix(c.foreground, c.muted) : c.gray,
+    ...BOLD_COLORS };
   for (const [name, value] of Object.entries(swatches)) {
     set(`c-${name}`, value);
     set(`c-${name}-ink`, ink(value));

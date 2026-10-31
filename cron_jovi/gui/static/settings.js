@@ -106,6 +106,65 @@ function aboutRow(title, detail, url) {
     url ? button("Copy link", copy, { class: "small" }) : null);
 }
 
+function updateProgress(tag) {
+  const line = h("p", {}, `Installing ${tag}. You can keep this open.`);
+  const close = modal("Updating Cron Jovi", line, []);
+  const poll = async () => {
+    const { status } = await get("/update").catch(() => ({ status: { state: "installing" } }));
+    if (status.state === "installing") { setTimeout(poll, 1000); return; }
+    close?.();
+    if (status.state === "done") {
+      modal("Update installed", h("p", {}, `${tag} is installed. Restart Cron Jovi to start using it.`),
+        [["Later", null, ""], ["Restart now", () => post("/update/restart"), "primary"]]);
+    } else {
+      modal("The update didn't finish", h("p", {}, `${status.message} Your current version still works.`), [["Close", null, ""]]);
+    }
+  };
+  setTimeout(poll, 1000);
+}
+
+export function updateDialog(release) {
+  modal(`Update to ${release.name}?`,
+    h("p", {}, "This downloads the new version from GitHub and installs it. Your workflows and history are kept, "
+      + "and Cron Jovi restarts when it's done."),
+    [["Not now", null, ""], ["Update", async () => {
+      try {
+        await post("/update/install", { tag: release.tag });
+      } catch (err) { toast(err.message, "error"); return false; }
+      updateProgress(release.tag);
+      return true;
+    }, "primary"]]);
+}
+
+export async function offerUpdate() {
+  const { available } = await get("/update").catch(() => ({}));
+  if (available) toast(`${available.name} is available`, "info", { label: "Update", run: () => updateDialog(available) });
+}
+
+function updatesRows() {
+  const host = h("div", { class: "rows" });
+  const paint = (result) => {
+    const found = result?.available;
+    const detail = found ? `${found.name} is available` : result?.error
+      || (result ? "You're on the latest version" : "Checks GitHub only when you press the button");
+    host.replaceChildren(
+      h("div", { class: "row" },
+        h("div", { class: "meta" }, h("strong", {}, "Updates"), h("small", {}, result?.blocked || detail)),
+        found && !result.blocked ? button("Update", () => updateDialog(found), { class: "small" })
+          : button("Check now", async () => paint(await get("/update?force=1")), { class: "small" })),
+      h("div", { class: "row" },
+        h("div", { class: "meta" }, h("strong", {}, "Check for updates automatically"),
+          h("small", {}, "Asks GitHub once a day, which lets GitHub see your IP address.")),
+        autoToggle));
+  };
+  const autoToggle = h("span", {});
+  get("/settings").then((current) => autoToggle.replaceChildren(toggle(Boolean(current.update_check),
+    (update_check) => put("/settings", { update_check }).catch((err) => toast(err.message, "error")),
+    "Check for updates automatically"))).catch(() => {});
+  paint(null);
+  return host;
+}
+
 export function aboutSection() {
   const version = S.status?.version ? `v${S.status.version} ${S.status.stage}` : "";
   return [
@@ -117,6 +176,8 @@ export function aboutSection() {
       aboutRow("License", "MIT. Free to use, share and change."),
       aboutRow("Source code", SOURCE_URL.replace("https://", ""), SOURCE_URL),
       aboutRow("Support Cron Jovi", SUPPORT_URL.replace("https://", ""), SUPPORT_URL)),
+    h("div", { class: "about-gap" }),
+    updatesRows(),
   ];
 }
 
