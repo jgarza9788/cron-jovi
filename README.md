@@ -6,6 +6,9 @@ no AI: it's plain, predictable automation that runs on your own computer.
 
 Built for Wayland (Hyprland and niri), and it picks up your theme on Omarchy.
 
+> **Beta.** Cron Jovi is in beta, so expect some rough edges and check what a workflow
+> does before relying on it.
+
 ![The workflow library](docs/screenshots/library.png)
 
 <p align="center">

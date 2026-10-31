@@ -2,3 +2,4 @@
 
 __version__ = "0.0.1"
 __codename__ = "Blaze of Glory"
+__stage__ = "Beta"

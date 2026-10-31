@@ -22,7 +22,7 @@ from pathlib import Path
 import yaml
 from flask import Flask, g, jsonify, request, send_from_directory
 
-from .. import __codename__, __version__, daemon, doctor, gallery, hotkeys, paths, schedule, settings, store
+from .. import __codename__, __stage__, __version__, daemon, doctor, gallery, hotkeys, paths, schedule, settings, store
 from ..action_api import describe, load_actions
 from ..engine import is_running, stop_run
 from ..history import History
@@ -126,6 +126,7 @@ def status() -> dict:
     return {
         "version": __version__,
         "codename": __codename__,
+        "stage": __stage__,
         "session": doctor.compositor(),
         "tools": tools,
         "timers_active": doctor.timers_active(),

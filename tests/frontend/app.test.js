@@ -11,7 +11,7 @@ const ACTIONS = [
   { name: "wait", title: "Wait", blurb: "", category: "Scripting", icon: "clock", color: "gray", tools: [], fields: [field("duration", "duration")] },
 ];
 const STATUS = {
-  version: "0.0.1", codename: "Blaze of Glory", session: "Hyprland", tools: [], timers_active: 0,
+  version: "0.0.1", codename: "Blaze of Glory", stage: "Beta", session: "Hyprland", tools: [], timers_active: 0,
   timers_total: 0, hotkey_links: [], engine: "not needed", paused: false, has_battery: false,
 };
 const THEME = { source: "default", stamp: "0", colors: {
@@ -200,7 +200,7 @@ test("Settings ends with the version and release name", async () => {
   const headings = [...document.querySelectorAll("h2.section")].map((el) => el.textContent);
   assert.equal(headings.at(-1), "About");
   const about = document.querySelector(".rows.about").textContent;
-  assert.match(about, /Cron Jovi v0\.0\.1/);
+  assert.match(about, /Cron Jovi v0\.0\.1 Beta/);
   assert.match(about, /Blaze of Glory/);
   assert.match(about, /MIT/);
 });

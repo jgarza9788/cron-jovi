@@ -107,7 +107,7 @@ function aboutRow(title, detail, url) {
 }
 
 export function aboutSection() {
-  const version = S.status?.version ? `v${S.status.version}` : "";
+  const version = S.status?.version ? `v${S.status.version} ${S.status.stage}` : "";
   return [
     h("h2", { class: "section" }, "About"),
     h("div", { class: "rows about" },

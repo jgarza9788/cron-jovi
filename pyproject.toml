@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 license-files = ["LICENSE"]
+classifiers = ["Development Status :: 4 - Beta"]
 dependencies = [
     "PyYAML>=6", "requests>=2.33", "Flask>=3.1.3", "Werkzeug>=3.1.9", "pywebview>=5", "watchdog>=4",
 ]

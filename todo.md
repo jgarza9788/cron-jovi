@@ -1,26 +1,16 @@
 # To do
 
-## Before a public release
+Finished work is in `docs/done.md`. The steps for a release are in `docs/RELEASING.md`.
 
-- [x] 1. Add a license: MIT
-- [x] 2. Set up CI, covering Python 3.11 through 3.14
-- [ ] 3. Tag a release: v0.0.1 *Blaze of Glory*. Tagged locally; push it once CI passes
-- [ ] 4. Add an AUR package. `packaging/aur/` is ready; not test-built or published yet
+## Release
 
-## Gaps against the design doc
+- [ ] 1. Commit the beta label, `docs/done.md`, `docs/RELEASING.md` and this file. Keep `logs_111672315389/` out of git
+- [ ] 2. Close the app, run `./install.sh`, and try a workflow, the `window` action and Settings → About. The installed copy is still 0.1.0, without the security fixes
+- [ ] 3. Move the local `v0.0.1` tag to the commit with the beta label, once CI passes on it
+- [ ] 4. Push the tag and create the GitHub pre-release: v0.0.1 *Blaze of Glory*
 
-- [x] 5. Add a `window` action to focus, move or close windows
-- [x] 6. Make `focus_app` work on niri
-- [ ] 7. Test hotkeys and workspace switching on a real niri session. CI checks the config and commands; a live session is still needed
-- [x] 8. Update the design doc: status, GUI toolkit decision, action count, overlap with n8n, Node-RED and Huginn
+## From the CI logs
 
-## Quality
-
-- [x] 9. Add front-end tests for the editor, drag and drop, and undo
-- [x] 10. Find and fix the unclosed SQLite connections and file
-
-## New
-
-- [x] 11. Add a Markdown guide for AI agents on creating workflows: `AGENTS.md`
-- [x] 12. Search for issues and CVEs and fix them
-- [x] 13. Add an About section at the end of Settings: v0.0.1 *Blaze of Glory*
+- [ ] 5. Update the GitHub Actions in `.github/workflows/ci.yml`. `actions/checkout@v4`, `actions/setup-python@v5` and `actions/setup-node@v4` run on the deprecated Node.js 20; the latest are v7 for all three
+- [ ] 6. Update jsdom from 26 to 30. npm warns that `whatwg-encoding`, which it pulls in, is deprecated
+- [ ] 7. Check CI still passes on Ubuntu 26. `ubuntu-latest` moves to it from October 19, 2026

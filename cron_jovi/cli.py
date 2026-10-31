@@ -8,7 +8,7 @@ import time
 from datetime import datetime
 
 
-from . import __codename__, __version__, daemon, doctor, gallery, hotkeys, paths, schedule, settings, store
+from . import __codename__, __stage__, __version__, daemon, doctor, gallery, hotkeys, paths, schedule, settings, store
 from . import explain as explain_module
 from .action_api import load_actions
 from .engine import run_single_step, run_workflow
@@ -317,7 +317,7 @@ def cmd_teardown(args) -> int:
 
 def parser() -> argparse.ArgumentParser:
     main_parser = argparse.ArgumentParser(prog="cronjovi", description=__doc__)
-    main_parser.add_argument("--version", action="version", version=f"cronjovi {__version__} ({__codename__})")
+    main_parser.add_argument("--version", action="version", version=f"cronjovi {__version__} {__stage__} ({__codename__})")
     sub = main_parser.add_subparsers(dest="command", required=True, metavar="COMMAND")
 
     run = sub.add_parser("run", help="run a workflow now")
