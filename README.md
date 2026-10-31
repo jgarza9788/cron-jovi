@@ -39,8 +39,8 @@ Then open **Cron Jovi** from your app launcher, or run `cronjovi gui`.
 
 The installer sets everything up inside your home folder and doesn't need root. It
 asks before adding the one line to your compositor config that loads hotkeys, and
-makes a backup first. Close the app before updating: run `./install.sh` again and
-your workflows are kept.
+makes a backup first. To update, use **Check now** in Settings, or run `cronjovi update`.
+Your workflows are kept. `./install.sh` also still works, once the app is closed.
 
 For its own window the app needs WebKitGTK (`webkit2gtk-4.1` and `python-gobject` on
 Arch). Without them it opens in your browser instead.
@@ -288,10 +288,12 @@ Everything in the app is plain files underneath, so the CLI works alongside it.
     cronjovi gallery               # shared workflows
     cronjovi gui                   # the app
     cronjovi completion            # bash tab completion
+    cronjovi update                # install the newest release from GitHub
 
 ## Privacy and security
 
-Nothing leaves your computer unless a workflow you wrote sends it. The app talks to a
+Nothing leaves your computer unless a workflow you wrote sends it, or you ask Cron Jovi
+to check for updates. Automatic checks are off until you turn them on in Settings. The app talks to a
 local server that only listens on 127.0.0.1 and needs a token created for each launch.
 Run logs can hold what your commands printed, and Settings can clear them.
 

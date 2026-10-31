@@ -19,10 +19,11 @@ import time
 import uuid
 from pathlib import Path
 
+import requests
 import yaml
 from flask import Flask, g, jsonify, request, send_from_directory
 
-from .. import __codename__, __stage__, __version__, daemon, doctor, gallery, hotkeys, paths, schedule, settings, store
+from .. import __codename__, __stage__, __version__, daemon, doctor, gallery, hotkeys, paths, schedule, settings, store, update
 from ..action_api import describe, load_actions
 from ..engine import is_running, stop_run
 from ..history import History
@@ -367,6 +368,47 @@ def create_app(token: str, port_holder: dict | None = None) -> Flask:
         settings.update(**request.get_json())
         store.sync()
         return jsonify(settings.load())
+
+    @app.get("/api/update")
+    def api_update():
+        force = request.args.get("force") == "1"
+        answer = {"current": __version__, "available": None, "blocked": update.blocked(),
+                  "status": update.status()}
+        try:
+            answer["available"] = update.check(force)
+        except (requests.RequestException, ValueError, KeyError, TypeError, AttributeError):
+            answer["error"] = "Couldn't reach GitHub to check for updates."
+        return jsonify(answer)
+
+    @app.post("/api/update/install")
+    def api_update_install():
+        tag = str(request.get_json().get("tag", ""))
+        if not update.is_newer(tag):
+            return jsonify(error="That isn't a newer version."), 400
+        if update.blocked():
+            return jsonify(error=update.blocked()), 400
+        running = [w.name for w in discover()[0] if is_running(w.slug)]
+        if running:
+            return jsonify(error=f"Wait for {', '.join(running)} to finish first."), 409
+        if update.status()["state"] == "installing":
+            return jsonify(error="An update is already installing."), 409
+        update.clear_status()
+        subprocess.Popen([sys.executable, "-m", "cron_jovi", "update", "--install", tag],
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        return jsonify(ok=True), 202
+
+    @app.post("/api/update/restart")
+    def api_update_restart():
+        """The new copy waits for this one to let go of the single-window lock."""
+        update.clear_status()
+        lock = paths.state_dir() / "gui.lock"
+        wait = 'while ! flock -n "$0" true; do sleep 0.2; done; exec "$1" -m cron_jovi gui'
+        subprocess.Popen(["sh", "-c", wait, str(lock), sys.executable],
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                         start_new_session=True)
+        threading.Timer(0.3, (port_holder or {}).get("quit", lambda: os._exit(0))).start()
+        return jsonify(ok=True), 202
 
     @app.get("/api/welcome")
     def api_welcome():

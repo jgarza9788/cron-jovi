@@ -6,7 +6,7 @@ import yaml
 
 from . import paths
 
-DEFAULTS = {"paused": False, "accent": ""}
+DEFAULTS = {"paused": False, "accent": "", "update_check": False}
 HEX_COLOR = re.compile(r"#[0-9a-fA-F]{6}")
 
 
@@ -21,6 +21,7 @@ def load() -> dict:
         saved = None
     merged = {**DEFAULTS, **{k: v for k, v in (saved or {}).items() if k in DEFAULTS}}
     merged["paused"] = bool(merged["paused"])
+    merged["update_check"] = bool(merged["update_check"])
     if not HEX_COLOR.fullmatch(str(merged["accent"])):
         merged["accent"] = ""
     return merged

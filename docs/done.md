@@ -4,7 +4,7 @@
 
 - [x] 1. Add a license: MIT
 - [x] 2. Set up CI, covering Python 3.11 through 3.14
-- [ ] 3. Tag a beta release: v0.0.1 *Blaze of Glory*. Tagged locally, before the beta label was added; move the tag, push it, and mark the GitHub release as a pre-release
+- [x] 3. Tag a beta release: v0.0.1 *Blaze of Glory*, published as a GitHub pre-release
 
 ## Gaps against the design doc
 
@@ -23,3 +23,10 @@
 - [x] 11. Add a Markdown guide for AI agents on creating workflows: `AGENTS.md`
 - [x] 12. Search for issues and CVEs and fix them
 - [x] 13. Add an About section at the end of Settings: v0.0.1 *Blaze of Glory*
+
+## Release
+
+- [x] Installed the release here and tried it on Hyprland: a workflow, and the `window` action focusing and closing a test window
+- [x] Updated the GitHub Actions to v7 and jsdom to 30
+- [x] Checked CI passes on Ubuntu 26.04
+- [x] Locked down the repo: "Protect main" and "Protect release tags" rulesets, and approval for every outside contributor's CI run

@@ -45,7 +45,7 @@ def launch(browser: bool = False, no_open: bool = False) -> int:
         return 0
 
     threading.Thread(target=server.serve_forever, daemon=True).start()
-    if browser or not _open_window(url):
+    if browser or not _open_window(url, holder):
         if not browser:
             print("No app window available; opening your browser instead.")
         webbrowser.open(url)
@@ -58,13 +58,14 @@ def launch(browser: bool = False, no_open: bool = False) -> int:
     return 0
 
 
-def _open_window(url: str) -> bool:
+def _open_window(url: str, holder: dict) -> bool:
     try:
         import webview
     except ImportError:
         return False
     try:
-        webview.create_window("Cron Jovi", url, width=1280, height=820, min_size=(960, 620))
+        window = webview.create_window("Cron Jovi", url, width=1280, height=820, min_size=(960, 620))
+        holder["quit"] = window.destroy
         storage = paths.state_dir() / "webview"
         storage.mkdir(parents=True, exist_ok=True)
         webview.start(gui="gtk", private_mode=False, storage_path=str(storage))

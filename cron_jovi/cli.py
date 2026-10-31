@@ -3,6 +3,7 @@
 import argparse
 import json
 import re
+import subprocess
 import sys
 import time
 from datetime import datetime
@@ -209,6 +210,33 @@ def cmd_gui(args) -> int:
     return launch(browser=args.browser, no_open=args.no_open)
 
 
+def cmd_update(args) -> int:
+    import requests
+
+    from . import update
+
+    if args.install:
+        return 0 if update.install(args.install) else 1
+    try:
+        release = update.check(force=True)
+    except requests.RequestException as err:
+        print(f"error: couldn't reach GitHub ({err})", file=sys.stderr)
+        return 1
+    if not release:
+        print(f"Cron Jovi {__version__} is up to date.")
+        return 0
+    print(f"{release['name']} is available: {release['url']}")
+    lock = paths.state_dir() / "gui.lock"
+    if lock.exists() and subprocess.run(["flock", "-n", str(lock), "true"]).returncode:
+        print("Close Cron Jovi, or use Settings in the app, to install it.", file=sys.stderr)
+        return 1
+    if not update.install(release["tag"]):
+        print(f"error: {update.status()['message']}", file=sys.stderr)
+        return 1
+    print(f"Updated to {release['tag']}.")
+    return 0
+
+
 def cmd_step(args) -> int:
     step = json.loads(args.step_json)
     validate_steps([step])
@@ -384,6 +412,10 @@ def parser() -> argparse.ArgumentParser:
     sub.add_parser("actions", help="list available actions").set_defaults(func=cmd_actions)
     sub.add_parser("doctor", help="report which Linux tools are installed").set_defaults(
         func=cmd_doctor)
+
+    update_parser = sub.add_parser("update", help="check GitHub for a new version and install it")
+    update_parser.add_argument("--install", help=argparse.SUPPRESS)
+    update_parser.set_defaults(func=cmd_update)
 
     sub.add_parser("daemon").set_defaults(func=cmd_daemon)
     sub.add_parser("tick").add_argument("name")

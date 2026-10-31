@@ -7,7 +7,7 @@ import { renderEditor, onStateRefresh } from "./editor.js";
 import { renderLog } from "./history.js";
 import { renderGallery } from "./gallery.js";
 import { renderOverview } from "./overview.js";
-import { renderSettings, toolDialog } from "./settings.js";
+import { offerUpdate, renderSettings, toolDialog } from "./settings.js";
 
 const top = document.getElementById("top");
 const body = document.getElementById("body");
@@ -76,6 +76,7 @@ async function boot() {
   await refresh();
   await go(S.view);
   if (!(await get("/welcome")).seen) welcomeDialog();
+  offerUpdate();
   setInterval(() => refreshTheme().catch(() => {}), 3000);
   let tick = 0;
   setInterval(() => {
