@@ -218,3 +218,26 @@ test("Settings offers an update it finds, and only checks when asked", async () 
   assert.ok([...document.querySelectorAll("button")].some((el) => el.textContent === "Update"));
   updateAnswer = { ...updateAnswer, available: null };
 });
+
+test("every icon choice is drawn, and none repeats", async () => {
+  const { ICON_CHOICES, icon } = await import(new URL("ui.js", STATIC));
+  assert.ok(ICON_CHOICES.length >= 50);
+  assert.equal(new Set(ICON_CHOICES).size, ICON_CHOICES.length);
+  const fallback = icon("no-such-icon").innerHTML;
+  for (const name of ICON_CHOICES.filter((item) => item !== "zap")) {
+    assert.notEqual(icon(name).innerHTML, fallback, name);
+  }
+});
+
+test("every color has a style, and bold colors keep readable text and their value", async () => {
+  const { BOLD_COLORS, COLOR_CHOICES } = await import(new URL("ui.js", STATIC));
+  const css = readFileSync(new URL("app.css", STATIC), "utf8");
+  for (const color of [...COLOR_CHOICES, ...Object.keys(BOLD_COLORS)]) {
+    assert.match(css, new RegExp(`\\.c-${color} \\{`), color);
+  }
+  const root = document.documentElement.style;
+  for (const [color, value] of Object.entries(BOLD_COLORS)) {
+    assert.equal(root.getPropertyValue(`--c-${color}`), value);
+    assert.match(root.getPropertyValue(`--c-${color}-ink`), /^#(ffffff|14161b)$/);
+  }
+});

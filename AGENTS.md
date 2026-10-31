@@ -41,7 +41,11 @@ on_failure:
     text: "{{ error }}"
 ```
 
-`name` and `steps` are required. Every step can also take `save_as`, `stop_on_error`
+`name` and `steps` are required. `icon` and `color` are optional, and the choices are
+in `cron_jovi/gui/static/ui.js`. Colors are `yellow`, `blue`, `pink`, `teal`, `purple`, `green`,
+`orange` and `gray`, which follow the theme, or `bold-red`, `bold-orange`, `bold-yellow`,
+`bold-lime`, `bold-green`, `bold-teal`, `bold-blue`, `bold-indigo`, `bold-purple` and `bold-pink`.
+Every step can also take `save_as`, `stop_on_error`
 and `skip`. A failed step marks the run failed, but later steps still run unless it has
 `stop_on_error: true`.
 
