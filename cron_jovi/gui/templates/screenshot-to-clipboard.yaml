@@ -1,0 +1,12 @@
+blurb: Select part of the screen and copy it
+name: Screenshot to Clipboard
+icon: clipboard
+color: teal
+trigger:
+  hotkey: Super+Shift+S
+steps:
+  - action: screenshot
+    area: selection
+    send_to: clipboard
+  - action: notify
+    text: Screenshot copied

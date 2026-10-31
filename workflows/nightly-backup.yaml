@@ -1,0 +1,16 @@
+name: Nightly Backup
+description: ""
+enabled: false
+trigger:
+  schedule: daily at 02:00
+  if_missed: run_once   # or skip
+  if_running: skip      # or restart
+steps:
+  - action: shell
+    run: rsync -a ~/Documents /mnt/backup/
+    stop_on_error: true
+on_failure:
+  - action: notify
+    title: Nightly Backup failed
+    text: "{{ error }}"
+    urgency: critical

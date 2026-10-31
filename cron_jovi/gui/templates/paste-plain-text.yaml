@@ -1,0 +1,13 @@
+blurb: Strip formatting from what you copied, then type it
+name: Paste Plain Text
+icon: clipboard
+color: pink
+trigger:
+  hotkey: Super+Shift+V
+steps:
+  - action: clipboard
+    save_as: clip
+  - action: wait
+    duration: 200ms
+  - action: type
+    text: "{{ clip }}"

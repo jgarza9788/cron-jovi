@@ -1,0 +1,15 @@
+blurb: Jot a thought into a notes file from anywhere
+name: Quick Note
+icon: list
+color: blue
+trigger:
+  hotkey: Super+Shift+N
+steps:
+  - action: ask
+    question: What's on your mind?
+    save_as: note
+    stop_on_error: true
+  - action: shell
+    run: echo {{ note }} >> ~/Notes.txt
+  - action: notify
+    text: Saved to Notes.txt

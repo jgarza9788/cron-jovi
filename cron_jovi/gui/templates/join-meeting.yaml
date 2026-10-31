@@ -1,0 +1,11 @@
+blurb: Go quiet and open your meeting link
+name: Join Meeting
+icon: globe
+color: blue
+trigger:
+  hotkey: Super+Shift+M
+steps:
+  - action: dnd
+    state: "on"
+  - action: open
+    target: https://meet.google.com

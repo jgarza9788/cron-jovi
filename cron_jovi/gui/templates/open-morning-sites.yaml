@@ -1,0 +1,14 @@
+blurb: Open the pages you start your day with
+name: Morning Tabs
+icon: globe
+color: blue
+trigger:
+  schedule: weekdays at 09:00
+  if_missed: skip
+steps:
+  - repeat:
+      - https://calendar.google.com
+      - https://mail.google.com
+    steps:
+      - action: open
+        target: "{{ item }}"

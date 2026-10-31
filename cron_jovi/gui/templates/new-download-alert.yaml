@@ -1,0 +1,10 @@
+blurb: Get a note when something lands in Downloads
+name: New Download Alert
+icon: folder
+color: teal
+trigger:
+  file: ~/Downloads
+steps:
+  - action: notify
+    title: New download
+    text: "{{ file.name }}"

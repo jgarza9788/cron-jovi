@@ -1,0 +1,11 @@
+blurb: A loud warning before your laptop dies
+name: Low Battery Warning
+icon: bell
+color: orange
+trigger:
+  battery: 15
+steps:
+  - action: notify
+    title: Battery low
+    text: "{{ battery.percent }}% left. Time to plug in."
+    urgency: critical

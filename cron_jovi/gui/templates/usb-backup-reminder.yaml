@@ -1,0 +1,16 @@
+blurb: Ask to back up when a drive is plugged in
+name: Backup on Plug-in
+icon: folder
+color: purple
+trigger:
+  device: { event: added }
+steps:
+  - action: ask
+    question: Back up now?
+    kind: yes-no
+    save_as: answer
+  - if:
+      equals: ["{{ answer }}", "yes"]
+    then:
+      - action: run
+        workflow: nightly-backup

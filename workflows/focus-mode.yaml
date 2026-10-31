@@ -1,0 +1,24 @@
+name: Focus Mode
+description: ""
+enabled: false
+trigger:
+  hotkey: Super+Shift+F
+steps:
+  - action: dnd
+    state: on
+  - action: media
+    command: pause
+    players: all
+  - action: workspace
+    number: 3
+    stop_on_error: true
+  - if:
+      time_of_day: { after: "18:00" }
+    then:
+      - action: brightness
+        percent: 40
+    else:
+      - action: brightness
+        percent: 70
+  - action: notify
+    text: Focus mode on

@@ -1,0 +1,10 @@
+blurb: A gentle nudge every two hours
+name: Water Reminder
+icon: bell
+color: green
+trigger:
+  schedule: every 2h
+  if_missed: skip
+steps:
+  - action: notify
+    text: Time for some water

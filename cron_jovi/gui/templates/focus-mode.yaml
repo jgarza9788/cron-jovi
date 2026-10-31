@@ -1,0 +1,21 @@
+blurb: Silence notifications, pause music, dim the screen
+name: Focus Mode
+icon: moon
+color: yellow
+trigger:
+  hotkey: Super+Shift+F
+steps:
+  - action: dnd
+    state: "on"
+  - action: media
+    command: pause
+  - if:
+      time_of_day: { after: "18:00" }
+    then:
+      - action: brightness
+        percent: 40
+    else:
+      - action: brightness
+        percent: 70
+  - action: notify
+    text: Focus mode on

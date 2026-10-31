@@ -1,0 +1,17 @@
+blurb: Copy Documents to a backup drive each night
+name: Folder Backup
+icon: folder
+color: purple
+trigger:
+  schedule: daily at 02:00
+  if_missed: run_once
+  if_running: skip
+steps:
+  - action: shell
+    run: rsync -a ~/Documents /mnt/backup/
+    stop_on_error: true
+on_failure:
+  - action: notify
+    title: Backup failed
+    text: "{{ error }}"
+    urgency: critical

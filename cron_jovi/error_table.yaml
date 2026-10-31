@@ -1,0 +1,303 @@
+# Plain-language translations for failed steps. First match wins, top to bottom.
+#
+# Add your own in ~/.config/cronjovi/errors.yaml, in this same format. Yours are
+# checked first, so they can replace anything here.
+#
+#   match:  a regular expression, ignoring case
+#   say:    what to tell the person. {path} is the file or folder from the error,
+#           and a (?P<name>...) group in match fills {name}
+#   else:   what to say when {path} can't be found in the error
+#   tool:   only when this program is what failed
+
+# What programs print. Specific causes go before general ones.
+output:
+  # Space and limits
+  - match: no space left on device|disk quota exceeded|not enough free space|disk full
+    say: There's no space left on the drive. Free some up and try again.
+  - match: file too large|file size limit exceeded|value too large for defined data type
+    say: That file is too big for this drive or program.
+  - match: too many open files
+    say: Too many files are open at once. Close some apps and try again.
+  - match: cannot allocate memory|out of memory|memoryerror|killed process
+    say: The computer ran out of memory. Close some apps and try again.
+  - match: argument list too long
+    say: Too many files were listed at once. Try fewer, or split them into groups.
+
+  # Drives
+  - match: read-only file system
+    say: "{path} can't be written to, because the drive is read-only."
+    else: That drive can't be written to, because it's read-only.
+  - match: input/output error|bad superblock|structure needs cleaning
+    say: The drive had trouble reading or writing. It may be failing, so back up what you can.
+  - match: target is busy|device or resource busy|text file busy
+    say: That's still in use. Close anything using it and try again.
+  - match: transport endpoint is not connected|stale file handle|stale nfs
+    say: A network or removable drive has disconnected. Reconnect it and try again.
+  - match: not mounted|no medium found|can't find in /etc/fstab|wrong fs type|unknown filesystem type
+    say: That drive isn't available. Check that it's plugged in and mounted.
+  - match: must be superuser|only root can|are you root|requires root|run as root|must be run as root|you need to be root|unless you are root
+    say: This needs administrator rights, which a workflow doesn't have.
+  - match: sudo:.*(terminal is required|password is required|askpass)
+    say: This needs your password, and a workflow can't type it in. Allow the command without a password, or run it yourself.
+  - match: "(is not in the sudoers|not allowed to run sudo)"
+    say: Your account isn't allowed to use sudo for this.
+
+  # Permissions
+  - match: "permission denied.*docker|docker.*permission denied"
+    say: Your account isn't allowed to use Docker.
+  - match: "permission denied \\(publickey|publickey,password\\)"
+    say: The login was refused. Check the SSH key or password for that computer.
+  - match: permission denied|operation not permitted|access denied|eacces|eperm
+    say: Cron Jovi doesn't have permission to use {path}.
+    else: Cron Jovi doesn't have permission to use that file or folder.
+
+  # Python and Node
+  - match: "no module named '?(?P<name>[\\w.]+)"
+    say: "This needs the Python package {name}, which isn't installed."
+  - match: "cannot find module '(?P<name>[./][^']*)'"
+    say: Can't find {name}. Check that it exists.
+  - match: "cannot find module '(?P<name>[^']+)'"
+    say: "This needs the Node package {name}, which isn't installed."
+  - match: "parse error"
+    tool: jq
+    say: That isn't valid JSON.
+  - match: "compile error"
+    tool: jq
+    say: The filter has a typing mistake in it.
+  - match: unknown suffix
+    say: That file isn't compressed, or its name doesn't end the way it should.
+  - match: no rule to make target|no makefile found|no targets specified
+    say: There's nothing to build here. Check you're in the right folder.
+  - match: syntaxerror|indentationerror|unexpected token
+    say: The script has a mistake in it. Check the script's code.
+  - match: "traceback \\(most recent call last\\)|unhandled exception|uncaught exception"
+    say: The script crashed. See Technical details for what happened.
+
+  # Files and folders
+  - match: "(?:bash|sh|zsh|line \\d+):.*?(?P<name>[\\w.+-]+): (?:command )?not found|^(?P<other>[\\w.+-]+): command not found"
+    say: "This step uses a program that isn't installed: {name}."
+  - match: no such process
+    say: That program isn't running.
+  - match: no such file or directory|cannot stat|can't stat|does not exist|no such device|cannot access|cannot find the|file not found|couldn't open file|no such file|could not find|couldn't find
+    say: Can't find {path}. Check that it exists, and that any drive it's on is plugged in.
+    else: Something this step needs can't be found. Check the folder and file names are right.
+  - match: not a directory
+    say: "{path} is a file, but this step needs a folder."
+    else: That's a file, but this step needs a folder.
+  - match: is a directory
+    say: "{path} is a folder, but this step needs a file."
+    else: That's a folder, but this step needs a file.
+  - match: directory not empty
+    say: "{path} still has files in it, so it can't be removed."
+    else: That folder still has files in it, so it can't be removed.
+  - match: file exists|already exists
+    say: "{path} already exists."
+    else: That file or folder already exists.
+  - match: are the same file
+    say: The source and destination are the same file.
+  - match: invalid cross-device link
+    say: Those two places are on different drives, so the file can't be moved that way.
+  - match: too many levels of symbolic links
+    say: A shortcut link points back at itself. Check {path}.
+    else: A shortcut link points back at itself.
+  - match: "not a git repository"
+    say: That folder isn't a git repository.
+  - match: not in gzip format|invalid compressed data|unexpected end of file|end-of-central-directory|cannot find zipfile|is not a zip file|not in bzip2 format|file format not recognized|this does not look like a tar archive|invalid data found
+    say: That file is damaged or isn't the type expected.
+  - match: "invalid option|unrecognized option|unknown option|illegal option|missing operand|^usage:|try '.+ --help'|invalid (time interval|argument|number)"
+    say: The command isn't written correctly. Check its spelling and options.
+  - match: syntax error|unexpected eof|unterminated|parse error|unexpected newline|end of string
+    say: The command has a typing mistake in it. Check for missing quotes or brackets.
+
+  # Network
+  - match: "could not resolve|couldn't resolve|name or service not known|temporary failure in name resolution|no address associated|unknown host|name resolution|bad address|nodename nor servname"
+    say: Can't reach the internet, or the address is wrong. Check your connection.
+  - match: network is unreachable|no route to host|host is down
+    say: Can't reach that computer. Check your network connection.
+  - match: connection refused|could not connect|couldn't connect|failed to connect|unable to connect|can't connect
+    say: Couldn't connect. The other computer or service may be down.
+  - match: connection timed out|operation timed out|timed out|timeout was reached
+    say: The connection took too long. The network or the other computer may be slow.
+  - match: connection reset|broken pipe|connection closed|connection lost|remote end hung up
+    say: The connection dropped partway through. Try again.
+  - match: "\\bssl\\b.*(error|fail)|certificate (verify|has expired|is not)|tls handshake"
+    say: The site's security certificate couldn't be verified.
+  - match: host key verification failed|remote host identification has changed
+    say: That computer's identity has changed, so the connection was stopped. Check it's the right computer.
+  - match: authentication failed|invalid credentials|login failed|incorrect password|bad credentials|invalid username|invalid password|unauthorized|not authorized
+    say: The login was refused. Check the username and password.
+  - match: "protocol .* not supported|malformed url|bad url"
+    say: The web address isn't written correctly.
+  - match: "\\b404\\b.*not found|not found.*\\b404\\b"
+    say: That web page wasn't found. Check the address.
+  - match: "\\b403\\b.*forbidden|forbidden.*\\b403\\b"
+    say: That site refused the request.
+  - match: "\\b(500|502|503|504)\\b.*(error|bad gateway|unavailable)"
+    say: That website is having problems right now. Try again later.
+
+  # Services and packages
+  - match: "unit (?P<name>\\S+) (not found|could not be found)"
+    say: "There's no service called {name} on this computer."
+  - match: failed to connect to bus|cannot autolaunch d-bus|no dbus
+    say: This couldn't reach your desktop session.
+  - match: cannot connect to the docker daemon|is the docker daemon running
+    say: Docker isn't running. Start it and try again.
+  - match: "unable to lock database|could not get lock|is another process using it|database is locked"
+    say: Something else is using that right now. Try again in a moment.
+  - match: "target not found|package .* not found|unable to locate package|no match for argument"
+    say: That package couldn't be found. Check its name.
+  - match: cannot open display|cannot connect to x server|wayland.*(failed|cannot)|could not connect to wayland|no display
+    say: This needs a desktop screen, and it couldn't find one.
+  - match: no player could handle|no players found
+    say: Nothing is playing right now, so there's no player to control.
+
+# Fixed messages from Cron Jovi's own actions.
+messages:
+  - match: "^(?P<name>\\S+) not found$"
+    say: This step needs {name}, which isn't installed.
+  - match: "^undefined variable: (?P<name>\\S+)$"
+    say: A step uses {name}, but nothing has set it yet. Check the steps before it.
+  - match: "returned 40[13]$"
+    say: That site refused the request.
+  - match: "returned 404$"
+    say: That web page wasn't found. Check the address.
+  - match: "returned 429$"
+    say: That site says there were too many requests. Try again later.
+  - match: "(?P<name>https?://\\S+) returned 5\\d\\d$"
+    say: "{name} is having problems right now. Try again later."
+  - match: "(?P<name>https?://\\S+) returned \\d+$"
+    say: "{name} didn't accept the request."
+  - match: "no players (found|could handle)"
+    say: Nothing is playing right now, so there's no player to control.
+  - match: "^no answer given$"
+    say: The question was closed without an answer.
+
+# What a program's exit code means, for when it prints nothing helpful.
+exit_codes:
+  rsync:
+    1: The backup command isn't written correctly. Check its options.
+    2: The two computers couldn't agree how to talk to each other.
+    3: Can't use one of the folders. Check that the source and destination exist.
+    5: Couldn't start talking to the other computer.
+    10: Couldn't connect to the other computer. Check your network.
+    11: The copy failed while writing files. The destination may be full or locked.
+    12: The connection dropped during the copy.
+    20: The copy was stopped before it finished.
+    23: Some files couldn't be copied. Check permissions and that the destination is writable.
+    24: Some files disappeared while they were being copied.
+    25: The copy stopped because it hit its deletion limit.
+    30: The copy took too long and timed out.
+    35: The copy timed out waiting for the other computer.
+  curl:
+    3: The web address isn't written correctly.
+    6: Can't find that website. Check the address and your connection.
+    7: Couldn't connect to that website.
+    18: The download stopped before it finished.
+    22: That website returned an error page.
+    23: Couldn't save the download. Check the folder and free space.
+    26: Couldn't read the file to upload.
+    28: The website took too long to respond.
+    35: A secure connection couldn't be set up.
+    47: That website redirected too many times.
+    52: That website sent back nothing.
+    56: The connection dropped during the transfer.
+    60: The site's security certificate couldn't be verified.
+  wget:
+    3: Couldn't save the download. Check the folder and free space.
+    4: A network problem stopped the download.
+    5: The site's security certificate couldn't be verified.
+    6: The login was refused.
+    8: That website returned an error page.
+  ssh:
+    255: Couldn't connect to that computer. Check the address and your network.
+  scp:
+    1: The copy to the other computer failed.
+  sftp:
+    1: The copy to the other computer failed.
+  tar:
+    1: Some files changed while being archived.
+    2: The archive couldn't be made or opened.
+  zip:
+    12: There was nothing to compress.
+    18: Couldn't read one of the files.
+  unzip:
+    9: That zip file couldn't be found.
+    11: That file wasn't in the zip.
+  gzip:
+    1: That file couldn't be compressed or opened.
+  grep:
+    1: The text being searched for wasn't found.
+    2: The file to search couldn't be read.
+  rg:
+    1: The text being searched for wasn't found.
+  diff:
+    1: The two files are different.
+  test:
+    1: That check came back false.
+  ping:
+    1: That computer didn't answer.
+    2: Can't reach that address. Check your connection.
+  git:
+    128: Git couldn't do that. Check you're in the right folder and that you can reach the repository.
+    1: Git stopped with a problem. See Technical details for what it said.
+  mount:
+    1: The drive couldn't be mounted.
+    32: The drive couldn't be mounted.
+  umount:
+    32: The drive couldn't be unmounted. It may still be in use.
+  systemctl:
+    1: That service couldn't be changed.
+    3: That service isn't running.
+    4: There's no such service on this computer.
+    5: There's no such service on this computer.
+  pacman:
+    1: The package command failed. See Technical details for what it said.
+  yay:
+    1: The package command failed. See Technical details for what it said.
+  apt:
+    100: The package command failed. See Technical details for what it said.
+  apt-get:
+    100: The package command failed. See Technical details for what it said.
+  dnf:
+    1: The package command failed. See Technical details for what it said.
+  make:
+    2: The build failed. See Technical details for what it said.
+  npm:
+    1: The npm command failed. See Technical details for what it said.
+  pip:
+    1: The pip command failed. See Technical details for what it said.
+  ffmpeg:
+    1: The media file couldn't be converted. Check the file and the settings.
+  jq:
+    2: The command isn't written correctly.
+    3: The filter has a typing mistake in it.
+    5: That isn't valid JSON.
+  notify-send:
+    1: The notification couldn't be shown.
+  wl-paste:
+    1: The clipboard is empty, or doesn't hold that type of content.
+  hyprctl:
+    1: Hyprland didn't accept that command.
+    7: Hyprland didn't accept that command.
+  "[":
+    1: That check came back false.
+  "false":
+    1: That check came back false.
+  sudo:
+    1: This needs your password, and a workflow can't type it in.
+
+# Codes that outrank what a program printed: bash prints "Permission denied" for a
+# file that simply isn't marked as runnable, and 126 is the honest answer.
+first_exit: [126]
+
+# Exit codes that mean the same thing for every program.
+any_exit:
+  2: The command isn't written correctly. Check its spelling and options.
+  124: This step took too long, so it was stopped.
+  126: That file can't be run. It may not be marked as a program.
+  127: This step needs a program that isn't installed.
+  130: The command was interrupted.
+  137: The command was forced to stop. The computer may have run out of memory.
+  139: The program crashed.
+  134: The program crashed.
+  143: The command was asked to stop.

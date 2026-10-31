@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cron-jovi"
+version = "0.1.0"
+description = "Shortcuts-style automation for the Linux desktop"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["PyYAML>=6", "requests>=2.31", "Flask>=3", "pywebview>=5", "watchdog>=4"]
+
+[project.scripts]
+cronjovi = "cron_jovi.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["cron_jovi*"]
+
+[tool.setuptools.package-data]
+"cron_jovi" = ["error_table.yaml"]
+"cron_jovi.gui" = ["static/*", "templates/*.yaml"]

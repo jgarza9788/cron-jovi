@@ -1,0 +1,14 @@
+blurb: Trim stray spaces from what you just copied
+name: Clean Up Clipboard
+icon: clipboard
+color: blue
+steps:
+  - action: clipboard
+    save_as: copied
+  - action: text
+    text: "{{ copied }}"
+    change: trim
+    save_as: cleaned
+  - action: clipboard
+    op: set
+    text: "{{ cleaned }}"
