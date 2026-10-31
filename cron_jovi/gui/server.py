@@ -51,7 +51,8 @@ class LiveRun:
         self.code: int | None = None
         # Its own session: closing the window must not kill a running backup.
         self.proc = subprocess.Popen(
-            [sys.executable, "-u", "-m", "cron_jovi", *args],
+            [*paths.self_command(), *args],
+            env={**os.environ, "PYTHONUNBUFFERED": "1"},
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,

@@ -4,3 +4,4 @@ build/
 .venv/
 node_modules/
 logs_*/
+dist-release/

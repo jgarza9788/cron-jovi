@@ -2,8 +2,8 @@
 
 Finished work is in `docs/done.md`. The steps for a release are in `docs/RELEASING.md`.
 
-## Updates
+## Release
 
-- [ ] 1. Merge the one-click update and `.github/CODEOWNERS` into `main` with a PR
-- [ ] 2. Release a new version. Only copies with this feature can update themselves, so v0.0.1 users need `git pull` and `./install.sh` once
-- [ ] 3. Try a real update and restart in the app window, from that release to the one after it
+- [ ] 1. Merge the release files PR into `main`
+- [ ] 2. Build from `main` and publish v0.0.1 with `scripts/release/publish.sh --replace`
+- [ ] 3. Release v0.0.2 *Livin' on a Prayer* and try a real one-click update from an `install.sh` copy of v0.0.1

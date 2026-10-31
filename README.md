@@ -29,7 +29,11 @@ Built for Wayland (Hyprland and niri), and it picks up your theme on Omarchy.
 
 ## Install
 
-You'll need Linux with systemd and Python 3.11 or newer.
+The [releases page](https://github.com/jgarza9788/cron-jovi/releases) has an Arch package and an AppImage. To install
+the Arch package, run `sudo pacman -U cron-jovi-*.pkg.tar.zst`. The AppImage needs a recent glibc and opens in your
+browser. These two update by downloading the next release.
+
+To install from source, you'll need Linux with systemd and Python 3.11 or newer.
 
     git clone https://github.com/jgarza9788/cron-jovi.git
     cd cron-jovi

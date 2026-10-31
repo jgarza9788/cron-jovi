@@ -1,0 +1,8 @@
+#!/bin/sh
+# Runs the bundled Python. cron_jovi/__main__.py clears these again once it has started,
+# so the commands in a workflow get the desktop's own libraries, not these.
+here="$(dirname "$(readlink -f "$0")")"
+export PYTHONHOME="$here/usr" LD_LIBRARY_PATH="$here/usr/lib" PYTHONNOUSERSITE=1
+unset PYTHONPATH
+[ $# -eq 0 ] && set -- gui
+exec "$here/usr/bin/python3" -m cron_jovi "$@"
